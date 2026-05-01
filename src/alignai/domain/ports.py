@@ -9,20 +9,22 @@ may import from infra/, agents/, or ui/.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from alignai.domain.models import (
-    Alignment,
-    AlignmentId,
-    AlignmentInputs,
-    AlignmentResult,
-    CoverLetter,
-    JobPosting,
-    ParsedResume,
-    Resume,
-    UnreadableJob,
-)
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from alignai.domain.models import (
+        Alignment,
+        AlignmentId,
+        AlignmentInputs,
+        AlignmentResult,
+        CoverLetter,
+        JobPosting,
+        ParsedResume,
+        Resume,
+        UnreadableJob,
+    )
 
 
 @dataclass(frozen=True)

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 try:
-    from importlib.metadata import version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError, version
 
     __version__: str = version("alignai")
-except Exception:  # pragma: no cover
+except PackageNotFoundError:  # pragma: no cover
     __version__ = "0.0.0.dev0"

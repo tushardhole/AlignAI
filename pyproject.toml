@@ -1,6 +1,8 @@
 [build-system]
 requires = ["setuptools>=72", "setuptools-scm>=8"]
-build-backend = "setuptools.backends.legacy:build"
+# PEP 517 standard backend (editable installs). The legacy backend was removed
+# in newer setuptools and breaks `pip install -e .` on CI runners.
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "alignai"
@@ -85,8 +87,6 @@ select = [
     "RUF",      # ruff-specific rules
 ]
 ignore = [
-    "ANN101",  # missing self annotation
-    "ANN102",  # missing cls annotation
     "ANN401",  # allow Any in limited cases (will be caught by mypy)
 ]
 

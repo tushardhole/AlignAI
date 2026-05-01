@@ -2,15 +2,16 @@
 
 > AI-powered resume and cover-letter aligner with a Telegram bot interface.
 
-AlignAI takes your base résumé, a cover-letter template, and a job-posting URL (or pasted text),
-then uses an agentic pipeline (OpenAI Agents SDK) to produce a tailored résumé and cover letter,
-ATS score, and match score — delivered as PDFs either through the desktop UI or your Telegram bot.
+AlignAI takes your base résumé, a cover-letter template, and a job-posting
+URL (or pasted text), then uses an agentic pipeline (OpenAI Agents SDK) to
+produce a tailored résumé and cover letter, ATS score, and match score —
+delivered as PDFs either through the desktop UI or your Telegram bot.
 
 ---
 
 ## Architecture
 
-```
+```text
 src/alignai/
   domain/       ← pure dataclasses + Protocol interfaces (no I/O)
   application/  ← use cases
@@ -38,10 +39,10 @@ See [`CLAUDE.md`](CLAUDE.md) (mirrored to [`.cursorrules`](.cursorrules)).
 ## Documentation
 
 | Doc | Description |
-|---|---|
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layer diagram, threading model |
-| [`docs/USAGE.md`](docs/USAGE.md) | Desktop + bot walkthroughs |
-| [`docs/AI_ENGINEERING.md`](docs/AI_ENGINEERING.md) | Tools, MCP, multi-agent rationale |
+| --- | --- |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Layer diagram, threading model |
+| [USAGE.md](docs/USAGE.md) | Desktop + bot walkthroughs |
+| [AI_ENGINEERING.md](docs/AI_ENGINEERING.md) | Tools, MCP, agents rationale |
 
 ## License
 

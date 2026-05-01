@@ -8,17 +8,19 @@ Pydantic v2 models with explicit model_config as required by CLAUDE.md.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
-from pathlib import Path
-from typing import NewType
+from enum import StrEnum
+from typing import TYPE_CHECKING, NewType
 
 from pydantic import BaseModel, ConfigDict, field_validator
+
+if TYPE_CHECKING:
+    from datetime import datetime
+    from pathlib import Path
 
 AlignmentId = NewType("AlignmentId", str)
 
 
-class MatchLabel(str, Enum):
+class MatchLabel(StrEnum):
     """Rating label produced by the MatchScorer agent."""
 
     STRONG_MATCH = "Strong Match"
@@ -89,7 +91,7 @@ class AtsScore:
 
     def __post_init__(self) -> None:
         if not (1 <= self.value <= 100):
-            raise ValueError(f"AtsScore must be 1–100, got {self.value}")
+            raise ValueError(f"AtsScore must be 1-100, got {self.value}")
 
 
 @dataclass(frozen=True)
@@ -100,7 +102,7 @@ class MatchScore:
 
     def __post_init__(self) -> None:
         if not (1 <= self.value <= 5):
-            raise ValueError(f"MatchScore must be 1–5, got {self.value}")
+            raise ValueError(f"MatchScore must be 1-5, got {self.value}")
 
 
 @dataclass(frozen=True)
@@ -157,12 +159,12 @@ class AlignmentResult(BaseModel):
     @classmethod
     def validate_ats_score(cls, v: int) -> int:
         if not (1 <= v <= 100):
-            raise ValueError(f"ats_score must be 1–100, got {v}")
+            raise ValueError(f"ats_score must be 1-100, got {v}")
         return v
 
     @field_validator("match_score")
     @classmethod
     def validate_match_score(cls, v: int) -> int:
         if not (1 <= v <= 5):
-            raise ValueError(f"match_score must be 1–5, got {v}")
+            raise ValueError(f"match_score must be 1-5, got {v}")
         return v

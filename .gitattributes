@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Default: normalize line endings to LF on commit (cross-platform safety)
+# ---------------------------------------------------------------------------
+* text=auto eol=lf
+
+# ---------------------------------------------------------------------------
+# Explicit text files — always LF
+# ---------------------------------------------------------------------------
+*.py    text eol=lf
+*.md    text eol=lf
+*.toml  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.json  text eol=lf
+*.txt   text eol=lf
+*.html  text eol=lf
+*.css   text eol=lf
+*.js    text eol=lf
+*.ts    text eol=lf
+*.sh    text eol=lf
+*.spec  text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.rst   text eol=lf
+
+# ---------------------------------------------------------------------------
+# Binary files — never diff / mangle
+# ---------------------------------------------------------------------------
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.svg   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.zip   binary
+*.tar   binary
+*.gz    binary
+*.bz2   binary
+*.xz    binary
+*.7z    binary
+*.dmg   binary
+*.exe   binary
+*.msi   binary
+*.AppImage binary
+*.pyc   binary
+*.pyd   binary
+*.so    binary
+*.dll   binary
+*.dylib binary
+
+# ---------------------------------------------------------------------------
+# Lock files — do not generate diffs; treat as text for merge
+# ---------------------------------------------------------------------------
+requirements*.txt linguist-generated=true

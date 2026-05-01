@@ -1,0 +1,50 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # ruff v0.4.x
+    rev: v0.4.10
+    hooks:
+      - id: ruff-format
+        name: ruff format
+      - id: ruff
+        name: ruff check
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        name: mypy
+        additional_dependencies:
+          - pydantic>=2.7
+          - openai>=1.30
+        args: [--config-file=pyproject.toml]
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: import-linter
+        name: import-linter (layer isolation)
+        language: system
+        entry: lint-imports
+        pass_filenames: false
+        always_run: true
+
+      - id: preflight
+        name: preflight (coding rules gate)
+        language: system
+        entry: python scripts/preflight.py
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-added-large-files
+        args: [--maxkb=500]

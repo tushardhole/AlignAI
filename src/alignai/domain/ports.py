@@ -19,6 +19,7 @@ from alignai.domain.models import (
     AlignmentResult,
     CoverLetter,
     JobPosting,
+    ParsedResume,
     Resume,
     UnreadableJob,
 )
@@ -110,3 +111,10 @@ class AgentRunner(Protocol):
     """Runs the multi-agent alignment pipeline and returns structured output."""
 
     async def run(self, inputs: AlignmentInputs) -> AlignmentResult: ...
+
+
+@runtime_checkable
+class ResumeParser(Protocol):
+    """Structurally parses a resume into ordered sections for chunked alignment."""
+
+    async def parse(self, resume: Resume) -> ParsedResume: ...

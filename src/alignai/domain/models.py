@@ -29,12 +29,29 @@ class MatchLabel(str, Enum):
 
 
 @dataclass(frozen=True)
+class ResumeSection:
+    """A single structural section of a resume (e.g. Experience, Education)."""
+
+    heading: str
+    content: str
+
+
+@dataclass(frozen=True)
+class ParsedResume:
+    """Result of structurally parsing a resume into ordered sections."""
+
+    resume_id: str
+    sections: tuple[ResumeSection, ...]
+
+
+@dataclass(frozen=True)
 class Resume:
     """Base resume document uploaded by the user."""
 
     id: str
     content: str
     file_path: Path | None = None
+    sections: tuple[ResumeSection, ...] | None = None
 
 
 @dataclass(frozen=True)

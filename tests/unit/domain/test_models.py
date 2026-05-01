@@ -10,7 +10,88 @@ from alignai.domain.models import (
     AtsScore,
     MatchLabel,
     MatchScore,
+    ParsedResume,
+    Resume,
+    ResumeSection,
 )
+
+
+class TestResumeSection:
+    def test_fields_stored(self) -> None:
+        section = ResumeSection(heading="Experience", content="5 years at Acme")
+        assert section.heading == "Experience"
+        assert section.content == "5 years at Acme"
+
+    def test_frozen(self) -> None:
+        section = ResumeSection(heading="Education", content="BSc CS")
+        with pytest.raises((AttributeError, TypeError)):
+            section.heading = "Skills"  # type: ignore[misc]
+
+    def test_equality(self) -> None:
+        a = ResumeSection(heading="Skills", content="Python, SQL")
+        b = ResumeSection(heading="Skills", content="Python, SQL")
+        assert a == b
+
+    def test_inequality_on_different_content(self) -> None:
+        a = ResumeSection(heading="Skills", content="Python")
+        b = ResumeSection(heading="Skills", content="Java")
+        assert a != b
+
+
+class TestParsedResume:
+    def test_fields_stored(self) -> None:
+        sections = (
+            ResumeSection(heading="Summary", content="Experienced engineer"),
+            ResumeSection(heading="Experience", content="5 years at Acme"),
+        )
+        parsed = ParsedResume(resume_id="r1", sections=sections)
+        assert parsed.resume_id == "r1"
+        assert len(parsed.sections) == 2
+        assert parsed.sections[0].heading == "Summary"
+
+    def test_frozen(self) -> None:
+        parsed = ParsedResume(
+            resume_id="r1",
+            sections=(ResumeSection(heading="Summary", content="text"),),
+        )
+        with pytest.raises((AttributeError, TypeError)):
+            parsed.resume_id = "r2"  # type: ignore[misc]
+
+    def test_empty_sections_allowed(self) -> None:
+        parsed = ParsedResume(resume_id="r1", sections=())
+        assert parsed.sections == ()
+
+    def test_sections_is_tuple(self) -> None:
+        section = ResumeSection(heading="Skills", content="Python")
+        parsed = ParsedResume(resume_id="r1", sections=(section,))
+        assert isinstance(parsed.sections, tuple)
+
+
+class TestResumeWithSections:
+    def test_sections_defaults_to_none(self) -> None:
+        resume = Resume(id="r1", content="raw text")
+        assert resume.sections is None
+
+    def test_sections_can_be_set(self) -> None:
+        sections = (
+            ResumeSection(heading="Experience", content="5 years"),
+            ResumeSection(heading="Education", content="BSc CS"),
+        )
+        resume = Resume(id="r1", content="raw text", sections=sections)
+        assert resume.sections is not None
+        assert len(resume.sections) == 2
+
+    def test_backward_compatible_without_sections(self) -> None:
+        resume = Resume(id="r2", content="some content")
+        assert resume.id == "r2"
+        assert resume.content == "some content"
+        assert resume.file_path is None
+        assert resume.sections is None
+
+    def test_frozen(self) -> None:
+        resume = Resume(id="r1", content="text")
+        with pytest.raises((AttributeError, TypeError)):
+            resume.sections = ()  # type: ignore[misc]
 
 
 class TestAtsScore:

@@ -87,8 +87,6 @@ select = [
     "RUF",      # ruff-specific rules
 ]
 ignore = [
-    "ANN101",  # missing self annotation
-    "ANN102",  # missing cls annotation
     "ANN401",  # allow Any in limited cases (will be caught by mypy)
 ]
 

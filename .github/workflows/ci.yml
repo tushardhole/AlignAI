@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [master]
+    branches: [main, master]
 
 # Minimal read-only permissions; jobs that need more elevate explicitly.
 permissions:
@@ -83,10 +83,7 @@ jobs:
       - name: Install dev dependencies
         run: pip install -e ".[dev]"
       - name: Run preflight gate
-        # --skip-missing-tests: Protocol method stubs in ports.py are public
-        # symbols without test counterparts by design; the flag will be removed
-        # once the application layer has full use-case test coverage.
-        run: python scripts/preflight.py --skip-missing-tests
+        run: python scripts/preflight.py
 
   # ---------------------------------------------------------------------------
   # Docs: markdownlint on all Markdown files

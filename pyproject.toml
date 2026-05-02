@@ -54,6 +54,10 @@ dev = [
     "types-Pygments",
 ]
 
+packaging = [
+    "pyinstaller>=6.0",
+]
+
 [project.scripts]
 alignai = "alignai.main:main"
 
@@ -88,6 +92,7 @@ select = [
 ]
 ignore = [
     "ANN401",  # allow Any in limited cases (will be caught by mypy)
+    "TCH",     # first-party type-checking blocks — keep imports at top for clarity
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -128,10 +133,16 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "integration: end-to-end tests requiring real LLM endpoint (deselect with -m 'not integration')",
 ]
-addopts = "--strict-markers -q"
+addopts = [
+    "--strict-markers",
+    "-q",
+    "-m",
+    "not integration",
+]
 
 [tool.coverage.run]
 source = ["src/alignai"]

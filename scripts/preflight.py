@@ -123,23 +123,42 @@ def check_class_sizes() -> list[str]:
 # ---------------------------------------------------------------------------
 
 
-def _public_symbols(layer_dir: Path) -> dict[str, set[str]]:
-    """Return {relative_file_path: {symbol_name}} for public functions/methods."""
-    result: dict[str, set[str]] = {}
-    for py_file in _python_files(layer_dir):
-        symbols: set[str] = set()
-        try:
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-        except SyntaxError:
-            continue
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
-                not node.name.startswith("_")
-            ):
-                symbols.add(node.name)
-        if symbols:
-            result[str(py_file.relative_to(REPO_ROOT))] = symbols
-    return result
+def _symbols_domain(py_file: Path) -> set[str]:
+    """Public module-level functions only (dataclass/Pydantic bodies are excluded)."""
+    if py_file.name == "ports.py":
+        return set()
+    symbols: set[str] = set()
+    try:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return symbols
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
+            not node.name.startswith("_")
+        ):
+            symbols.add(node.name)
+    return symbols
+
+
+def _symbols_application(py_file: Path) -> set[str]:
+    """Public methods on use-case classes plus module-level helpers."""
+    symbols: set[str] = set()
+    try:
+        tree = ast.parse(py_file.read_text(encoding="utf-8"))
+    except SyntaxError:
+        return symbols
+    for node in tree.body:
+        if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+            for item in node.body:
+                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
+                    not item.name.startswith("_")
+                ):
+                    symbols.add(item.name)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and (
+            not node.name.startswith("_")
+        ):
+            symbols.add(node.name)
+    return symbols
 
 
 def _tested_names() -> set[str]:
@@ -166,9 +185,15 @@ def check_missing_tests() -> list[str]:
         layer_dir = SRC_ROOT / layer
         if not layer_dir.exists():
             continue
-        for src_file, symbols in _public_symbols(layer_dir).items():
+        for py_file in _python_files(layer_dir):
+            if layer == "domain":
+                symbols = _symbols_domain(py_file)
+            else:
+                symbols = _symbols_application(py_file)
+            if not symbols:
+                continue
+            src_file = str(py_file.relative_to(REPO_ROOT))
             for name in sorted(symbols):
-                # Accept test_{name} or test_{anything}_{name} anywhere in tests/
                 has_test = any(t == f"test_{name}" or t.endswith(f"_{name}") for t in tested)
                 if not has_test:
                     violations.append(

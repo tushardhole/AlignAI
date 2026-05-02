@@ -140,14 +140,16 @@ class TestMatchScore:
 
 
 class TestMatchLabel:
-    def test_all_five_labels_exist(self) -> None:
+    def test_all_labels_exist(self) -> None:
         labels = {label.value for label in MatchLabel}
         assert labels == {
             "Strong Match",
             "Good Match",
             "Fair Match",
+            "Low Match",
             "Weak Match",
             "Poor Match",
+            "Zero Match",
         }
 
     def test_str_enum_equality(self) -> None:

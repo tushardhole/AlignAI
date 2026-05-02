@@ -129,6 +129,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "integration: end-to-end tests requiring real LLM endpoint (deselect with -m 'not integration')",
 ]

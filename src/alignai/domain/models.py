@@ -26,8 +26,10 @@ class MatchLabel(StrEnum):
     STRONG_MATCH = "Strong Match"
     GOOD_MATCH = "Good Match"
     FAIR_MATCH = "Fair Match"
+    LOW_MATCH = "Low Match"
     WEAK_MATCH = "Weak Match"
     POOR_MATCH = "Poor Match"
+    ZERO_MATCH = "Zero Match"
 
 
 @dataclass(frozen=True)

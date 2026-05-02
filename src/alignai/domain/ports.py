@@ -116,6 +116,13 @@ class AgentRunner(Protocol):
 
 
 @runtime_checkable
+class TelegramCredentialsVerifier(Protocol):
+    """Checks that a Telegram bot token is accepted by the Bot API."""
+
+    async def verify_bot_token(self, token: str) -> bool: ...
+
+
+@runtime_checkable
 class ResumeParser(Protocol):
     """Structurally parses a resume into ordered sections for chunked alignment."""
 

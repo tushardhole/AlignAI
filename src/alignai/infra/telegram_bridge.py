@@ -9,8 +9,6 @@ from typing import Any
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-from alignai.application.handle_telegram_message import HandleTelegramMessage
-
 
 class TelegramBotService:
     """Runs python-telegram-bot with async handlers."""
@@ -18,7 +16,7 @@ class TelegramBotService:
     def __init__(
         self,
         bot_token: str,
-        handler: HandleTelegramMessage,
+        handler: Any,
     ) -> None:
         self._token = bot_token
         self._handler = handler
@@ -40,13 +38,25 @@ class TelegramBotService:
         self._app = app
         return app
 
-    async def _on_align(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def _on_align(
+        self,
+        update: Update,
+        _context: ContextTypes.DEFAULT_TYPE,
+    ) -> None:
         await self._dispatch(update, "/align")
 
-    async def _on_help(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def _on_help(
+        self,
+        update: Update,
+        _context: ContextTypes.DEFAULT_TYPE,
+    ) -> None:
         await self._dispatch(update, "/help")
 
-    async def _on_text(self, update: Update, _context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def _on_text(
+        self,
+        update: Update,
+        _context: ContextTypes.DEFAULT_TYPE,
+    ) -> None:
         if update.effective_chat is None or update.message is None:
             return
         text = update.message.text or ""

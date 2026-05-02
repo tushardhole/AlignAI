@@ -88,6 +88,7 @@ select = [
 ]
 ignore = [
     "ANN401",  # allow Any in limited cases (will be caught by mypy)
+    "TCH",  # keep imports at top for infra/SDK modules (type-checking moves hurt readability)
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -134,8 +135,14 @@ markers = [
 addopts = "--strict-markers -q"
 
 [tool.coverage.run]
+# Gate matches CLAUDE.md: ≥85% on domain + application only (infra/agents/ui/main excluded).
 source = ["src/alignai"]
-omit = ["src/alignai/ui/*", "src/alignai/main.py"]
+omit = [
+    "src/alignai/ui/*",
+    "src/alignai/main.py",
+    "src/alignai/infra/*",
+    "src/alignai/agents/*",
+]
 
 [tool.coverage.report]
 fail_under = 85

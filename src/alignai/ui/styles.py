@@ -56,7 +56,7 @@ QPushButton:disabled {
 QPushButton[secondary="true"] {
     background-color: #E2E8F0;
     color: #334155;
-    padding: 8px 20px;
+    padding: 8px 24px;
     min-height: 24px;
 }
 

@@ -46,6 +46,7 @@ class HomePage(QWidget):
         self.btn_new = QPushButton("+ New Alignment")
         self.btn_settings = QPushButton("Settings")
         self.btn_settings.setProperty("secondary", True)
+        self.btn_settings.setMinimumWidth(110)
         top.addWidget(title)
         top.addStretch()
         top.addWidget(self.btn_settings)

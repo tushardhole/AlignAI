@@ -26,7 +26,7 @@ from alignai.domain.models import (
     Resume,
     UnreadableJob,
 )
-from alignai.domain.ports import DocumentRepository, JobFetcher
+from alignai.domain.ports import AlignmentRepository, DocumentRepository, JobFetcher
 from alignai.ui.async_runner_thread import AsyncRunnerThread
 from alignai.ui.home_page import HomePage
 from alignai.ui.new_alignment_page import NewAlignmentPage
@@ -43,7 +43,7 @@ class MainDeps:
     set_base_documents: SetBaseDocuments
     documents: DocumentRepository
     job_fetcher: JobFetcher
-    alignment_repo: object  # AlignmentRepository, but we avoid the import in ui/
+    alignment_repo: AlignmentRepository
 
 
 class MainWindow(QMainWindow):

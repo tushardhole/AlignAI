@@ -53,11 +53,17 @@ class MainWindow(QMainWindow):
         deps: MainDeps,
         settings_get: Callable[[str], str | None],
         settings_set: Callable[[str, str], None],
+        secrets_get: Callable[[str], str | None],
+        secrets_set: Callable[[str, str], None],
+        rebuild_llm: Callable[[], CreateAlignment],
     ) -> None:
         super().__init__()
         self._deps = deps
         self._settings_get = settings_get
         self._settings_set = settings_set
+        self._secrets_get = secrets_get
+        self._secrets_set = secrets_set
+        self._rebuild_llm = rebuild_llm
         self.setWindowTitle("AlignAI")
         self.resize(1000, 640)
 
@@ -100,6 +106,7 @@ class MainWindow(QMainWindow):
         self._stack.setCurrentWidget(self._home_page)
 
     def _go_settings(self) -> None:
+        self._settings_page.api_key.clear()
         self._stack.setCurrentWidget(self._settings_page)
 
     def _go_new(self) -> None:
@@ -147,6 +154,7 @@ class MainWindow(QMainWindow):
         self._pending_url = url
         self._pending_resume = resume
         self._pending_cover = cover
+        self._new_page.set_loading(True)
 
         async def fetch_only() -> object:
             return await self._deps.job_fetcher.fetch(url)
@@ -162,8 +170,10 @@ class MainWindow(QMainWindow):
         resume = self._pending_resume
         cover = self._pending_cover
         if resume is None or cover is None:
+            self._new_page.set_loading(False)
             return
         if isinstance(got, UnreadableJob):
+            self._new_page.set_loading(False)
             text, ok = QInputDialog.getMultiLineText(
                 self,
                 "Paste job description",
@@ -178,10 +188,12 @@ class MainWindow(QMainWindow):
                 description=text.strip(),
                 source="pasted",
             )
+            self._new_page.set_loading(True)
             self._run_execute(jp, resume, cover)
             return
 
         if not isinstance(got, JobPosting):
+            self._new_page.set_loading(False)
             QMessageBox.warning(self, "AlignAI", "Unexpected fetch result.")
             return
 
@@ -189,11 +201,7 @@ class MainWindow(QMainWindow):
 
     def _run_execute(self, jp: JobPosting, resume: Resume, cover: CoverLetter) -> None:
         async def align() -> Alignment:
-            inputs = AlignmentInputs(
-                resume=resume,
-                cover_letter=cover,
-                job_posting=jp,
-            )
+            inputs = AlignmentInputs(resume=resume, cover_letter=cover, job_posting=jp)
             return await self._deps.create_alignment.execute(inputs)
 
         self._align_thr = AsyncRunnerThread(align())
@@ -203,22 +211,29 @@ class MainWindow(QMainWindow):
 
     @Slot(object)
     def _show_alignment_result(self, align: object) -> None:
+        self._new_page.set_loading(False)
         if not isinstance(align, Alignment):
             return
-        self._result_page.summary.setText(
-            f"ATS {align.ats_score.value}/100 — Match {align.match_score.value}/5 "
-            f"({align.match_label.value})\n\n"
-            f"Resume: {align.aligned_resume.file_path}\n"
-            f"Cover: {align.aligned_cover_letter.file_path}",
+        self._result_page.show_result(
+            ats_score=align.ats_score.value,
+            match_score=align.match_score.value,
+            match_label=align.match_label.value,
+            resume_path=align.aligned_resume.file_path,
+            cover_path=align.aligned_cover_letter.file_path,
         )
         self.refresh_table()
         self._stack.setCurrentWidget(self._result_page)
 
     @Slot(str)
     def _on_async_fail(self, msg: str) -> None:
+        self._new_page.set_loading(False)
         QMessageBox.critical(self, "AlignAI", msg)
 
     def _save_settings(self) -> None:
         self._settings_set("llm_base_url", self._settings_page.base_url.text())
         self._settings_set("llm_model", self._settings_page.model_name.text())
-        QMessageBox.information(self, "AlignAI", "Saved.")
+        api_key = self._settings_page.api_key.text().strip()
+        if api_key:
+            self._secrets_set("llm_api_key", api_key)
+        self._deps.create_alignment = self._rebuild_llm()
+        QMessageBox.information(self, "AlignAI", "Saved — changes take effect immediately.")

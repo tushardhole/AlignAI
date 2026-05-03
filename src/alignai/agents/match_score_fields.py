@@ -34,21 +34,7 @@ class MatchScoreFields(BaseModel):
             "value",
             "overall_score",
         )
-        label_val = find_value(
-            data,
-            "label",
-            "match_label",
-            "matchLabel",
-            "category",
-            "bucket",
-            "rating_label",
-            "match_category",
-            "fit_label",
-            "result",
-        )
         score = coerce_int(score_val, 1, 5) if score_val is not None else 3
-        if label_val is not None:
-            label = coerce_match_label(label_val, score)
-        else:
-            label = coerce_match_label("", score)
+        # Always derive label from numeric score — LLM label text is unreliable
+        label = coerce_match_label("", score)
         return {"score": score, "label": label}

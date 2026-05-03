@@ -44,10 +44,11 @@ class HomePage(QWidget):
         title.setStyleSheet("font-size: 20px; font-weight: bold;")
         self.btn_refresh = QPushButton("↻")
         self.btn_refresh.setProperty("secondary", True)
-        self.btn_refresh.setMaximumSize(32, 32)
+        self.btn_refresh.setMinimumSize(40, 32)
+        self.btn_refresh.setMaximumSize(50, 40)
         self.btn_refresh.setToolTip("Refresh alignments")
         self.btn_refresh.setStyleSheet(
-            "font-size: 18px; font-weight: bold; padding: 0px; color: #334155;"
+            "font-size: 20px; font-weight: bold; padding: 4px 6px; color: #334155;"
         )
         self.btn_new = QPushButton("+ New Alignment")
         self.btn_settings = QPushButton("Settings")

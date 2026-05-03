@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 from agents.model_settings import ModelSettings
 from agents.models.default_models import get_default_model_settings
+
+_JSON_OBJECT_HOSTS = {"api.groq.com"}
 
 
 def use_json_object_for_structured_output(
@@ -14,8 +18,8 @@ def use_json_object_for_structured_output(
     """Whether to force ``response_format: json_object`` (Groq and similar providers)."""
     if settings_json_object_flag == "1":
         return True
-    url = (llm_base_url or "").lower()
-    return "groq.com" in url
+    host = urlparse(llm_base_url or "").hostname or ""
+    return host in _JSON_OBJECT_HOSTS
 
 
 def merged_json_object_model_settings() -> ModelSettings:

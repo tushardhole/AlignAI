@@ -23,17 +23,17 @@ _RESUME_PARSER_JSON_OBJECT_SHAPE = (
     '"Experience":[{"Employer":"Acme","Title":"Role","Duration":"2020-2024",'
     '"Responsibilities":["..."]}], '
     "never use Experience as a single object wrapping job objects; use an array as shown. "
-    'INVALID: \"Experience\":{\"Employer\":\"Acme\"}. '
-    'VALID: \"Experience\":[{\"Employer\":\"Acme\"}]. '
+    'INVALID: "Experience":{"Employer":"Acme"}. '
+    'VALID: "Experience":[{"Employer":"Acme"}]. '
     "Close all brackets and braces. Avoid deep nesting."
 )
 
 _MERGER_OUTPUT_HINT = (
-    " Your JSON must have exactly one top-level key \"content\". "
+    ' Your JSON must have exactly one top-level key "content". '
     "Its value is the full resume as one plain-text string (newlines between sections). "
     "Do not output contact, summary, experience, skills, or education as nested JSON objects "
     "or arrays — nesting makes responses too long and invalid. "
-    "Only: {\"content\": \"...full resume text...\"}."
+    'Only: {"content": "...full resume text..."}.'
 )
 
 
@@ -94,8 +94,7 @@ class ChunkedResumeAligner:
             name="ResumeSectionAligner",
             instructions=(
                 "Rewrite only this section for the target role. "
-                "Keep employers, dates, and degrees accurate."
-                + self._instruction_suffix
+                "Keep employers, dates, and degrees accurate." + self._instruction_suffix
             ),
             model=self._model,
             model_settings=self._agent_model_settings,

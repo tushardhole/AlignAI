@@ -19,8 +19,8 @@ _JOB_BRIEF_SHAPE_HINT = (
     '"title" (string), "summary" (string), "must_have_skills" (array of strings), '
     '"nice_to_have_skills" (array of strings). '
     "Put each skill as a quoted string inside those two arrays only. "
-    "INVALID (will not parse): a nested \"skills\" object whose keys contain pseudo-code such as "
-    '`required([` or `niceToHave([` or parentheses inside key names—never emit that. '
+    'INVALID (will not parse): a nested "skills" object whose keys contain pseudo-code such as '
+    "`required([` or `niceToHave([` or parentheses inside key names—never emit that. "
     'VALID example: {"title":"Engineer","summary":"...","must_have_skills":["Python","AWS"],'
     '"nice_to_have_skills":["Beego"]}. '
     "Do not output responsibilities, benefits, or education as separate large JSON arrays; "
@@ -79,8 +79,7 @@ class AlignAiAgentSteps:
             name="ResumeAligner",
             instructions=(
                 "Rewrite the resume for this job. Keep facts truthful. "
-                "Plain UTF-8 text only (no markdown fences)."
-                + self._instruction_suffix
+                "Plain UTF-8 text only (no markdown fences)." + self._instruction_suffix
             ),
             model=self._model,
             model_settings=self._agent_model_settings,
@@ -110,8 +109,7 @@ class AlignAiAgentSteps:
             name="CoverLetterAligner",
             instructions=(
                 "Write a tailored cover letter in plain text. "
-                "Professional tone; no Dear Hiring Manager placeholders."
-                + self._instruction_suffix
+                "Professional tone; no Dear Hiring Manager placeholders." + self._instruction_suffix
             ),
             model=self._model,
             model_settings=self._agent_model_settings,

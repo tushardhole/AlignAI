@@ -25,7 +25,7 @@ class AsyncRunnerThread(QThread):
         try:
             out = loop.run_until_complete(self._coro)
             self.finished_ok.emit(out)
-        except (ValueError, OSError, RuntimeError, TypeError) as exc:
+        except Exception as exc:
             self.failed.emit(str(exc))
         finally:
             loop.close()

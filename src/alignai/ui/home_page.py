@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from collections.abc import Callable
+
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QFont
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -17,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from alignai.application.list_alignments import ListAlignments
+from alignai.domain.models import AlignmentId
 from alignai.ui.styles import MATCH_LABEL_COLORS
 
 _LINK_COLOR = QColor("#2563EB")
@@ -28,9 +32,11 @@ class HomePage(QWidget):
     def __init__(
         self,
         list_alignments: ListAlignments,
+        on_delete: Callable[[AlignmentId], None] | None = None,
     ) -> None:
         super().__init__()
         self._list_uc = list_alignments
+        self._on_delete_callback = on_delete
         layout = QVBoxLayout(self)
         layout.setContentsMargins(24, 24, 24, 24)
 
@@ -46,9 +52,9 @@ class HomePage(QWidget):
         top.addWidget(self.btn_new)
         layout.addLayout(top)
 
-        self.table = QTableWidget(0, 7)
+        self.table = QTableWidget(0, 8)
         self.table.setHorizontalHeaderLabels(
-            ["Job", "Job link", "Resume PDF", "Cover PDF", "Match", "ATS", "Label"]
+            ["Job", "Job link", "Resume PDF", "Cover PDF", "Match", "ATS", "Label", ""]
         )
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -85,6 +91,13 @@ class HomePage(QWidget):
             bold.setBold(True)
             label_item.setFont(bold)
             self.table.setItem(row, 6, label_item)
+            btn_delete = QPushButton("Delete")
+            btn_delete.setProperty("secondary", True)
+            btn_delete.setMaximumWidth(80)
+            btn_delete.clicked.connect(
+                lambda checked, aid=align.id: self._on_delete_clicked(aid)
+            )
+            self.table.setCellWidget(row, 7, btn_delete)
 
     @staticmethod
     def _link_item(text: str, path: Path | None) -> QTableWidgetItem:
@@ -108,3 +121,16 @@ class HomePage(QWidget):
             path = Path(path_str)
             if path.exists():
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
+
+    def _on_delete_clicked(self, alignment_id: AlignmentId) -> None:
+        reply = QMessageBox.warning(
+            self,
+            "Delete Alignment",
+            "Are you sure you want to delete this alignment?\nThis cannot be undone.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        if self._on_delete_callback:
+            self._on_delete_callback(alignment_id)
+            self.refresh_table()

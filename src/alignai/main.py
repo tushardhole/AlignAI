@@ -95,6 +95,7 @@ def main() -> None:
         set_base_documents=set_docs_uc,
         documents=documents,
         job_fetcher=job_fetcher,
+        alignment_repo=alignment_repo,
     )
 
     def rebuild_llm() -> CreateAlignment:

@@ -65,6 +65,8 @@ class AlignmentRepository(Protocol):
 
     def get(self, alignment_id: AlignmentId) -> Alignment | None: ...
 
+    def delete(self, alignment_id: AlignmentId) -> None: ...
+
 
 @runtime_checkable
 class LlmClient(Protocol):

@@ -107,9 +107,7 @@ class HomePage(QWidget):
             btn_delete.setStyleSheet(
                 "font-size: 18px; font-weight: bold; padding: 0px; color: #334155;"
             )
-            btn_delete.clicked.connect(
-                lambda checked, aid=align.id: self._on_delete_clicked(aid)
-            )
+            btn_delete.clicked.connect(lambda checked, aid=align.id: self._on_delete_clicked(aid))
             self.table.setCellWidget(row, 7, btn_delete)
 
     @staticmethod

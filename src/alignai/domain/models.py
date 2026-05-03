@@ -32,6 +32,17 @@ class MatchLabel(StrEnum):
     ZERO_MATCH = "Zero Match"
 
 
+def label_from_score(score: int) -> MatchLabel:
+    """Deterministically map a match score (1-5) to a label."""
+    return {
+        5: MatchLabel.STRONG_MATCH,
+        4: MatchLabel.GOOD_MATCH,
+        3: MatchLabel.FAIR_MATCH,
+        2: MatchLabel.LOW_MATCH,
+        1: MatchLabel.WEAK_MATCH,
+    }.get(score, MatchLabel.FAIR_MATCH)
+
+
 @dataclass(frozen=True)
 class ResumeSection:
     """A single structural section of a resume (e.g. Experience, Education)."""

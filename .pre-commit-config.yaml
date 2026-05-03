@@ -17,6 +17,9 @@ repos:
         additional_dependencies:
           - pydantic>=2.7
           - openai>=1.30
+          - types-PyYAML
+          - types-requests
+          - PySide6-stubs
         args: [--config-file=pyproject.toml]
         pass_filenames: false
 
@@ -32,7 +35,7 @@ repos:
       - id: preflight
         name: preflight (coding rules gate)
         language: system
-        entry: python scripts/preflight.py
+        entry: python3 scripts/preflight.py
         pass_filenames: false
         always_run: true
         stages: [pre-commit]

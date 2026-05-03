@@ -21,7 +21,7 @@ def test_parsed_resume_coerces_semantic_json_resume() -> None:
             {
                 "position": "Senior Backend Engineer",
                 "company": "HelloFresh, Berlin",
-                "date": "Jun 2023 – Dec 2024",
+                "date": "Jun 2023 - Dec 2024",
                 "responsibilities": [
                     "Owned design and delivery of HelloPay.",
                     "Migrated messaging from RabbitMQ to Kafka.",
@@ -59,7 +59,7 @@ def test_parsed_resume_experience_and_education_as_dicts() -> None:
         "experiences": {
             "Senior Backend Engineer (IC5)": {
                 "Company": "HelloFresh, Berlin",
-                "Dates": "Jun 2023 – Dec 2024",
+                "Dates": "Jun 2023 - Dec 2024",
                 "Points": ["Shipped payments platform.", "Migrated to Kafka."],
             }
         },
@@ -135,7 +135,7 @@ def test_parsed_resume_profile_summary_skills_experience_loose_shape() -> None:
             {
                 "Employer": "HelloFresh",
                 "Title": "Senior Backend Engineer",
-                "Duration": "2023–2024",
+                "Duration": "2023-2024",
                 "Description": "Shipped payments.\nOwned Kafka migration.",
             }
         ],

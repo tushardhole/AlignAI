@@ -6,7 +6,11 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from alignai.agents.llm_json_coercion import _norm_key, coerce_str, find_value  # type: ignore[attr-defined]
+from alignai.agents.llm_json_coercion import (  # type: ignore[attr-defined]
+    _norm_key,
+    coerce_str,
+    find_value,
+)
 
 # Maps normalised key → canonical section heading
 _HEADING_MAP: dict[str, str] = {

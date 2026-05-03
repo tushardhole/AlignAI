@@ -14,11 +14,12 @@ MATCH_LABEL_COLORS: dict[str, str] = {
 
 APP_STYLESHEET = """
 QMainWindow {
-    background-color: #F1F5F9;
+    background-color: #F8FAFC;
 }
 
 QWidget {
     font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1E293B;
 }
 
 QPushButton {
@@ -30,18 +31,25 @@ QPushButton {
     font-size: 13px;
     font-weight: 600;
     min-height: 20px;
+    outline: none;
 }
 
 QPushButton:hover {
     background-color: #1D4ED8;
+    outline: none;
 }
 
 QPushButton:pressed {
     background-color: #1E40AF;
 }
 
+QPushButton:focus {
+    outline: 2px solid #DBEAFE;
+    outline-offset: 2px;
+}
+
 QPushButton:disabled {
-    background-color: #94A3B8;
+    background-color: #CBD5E1;
     color: #E2E8F0;
 }
 
@@ -76,26 +84,28 @@ QLabel {
 
 QTableWidget {
     border: 1px solid #E2E8F0;
-    border-radius: 4px;
+    border-radius: 8px;
     background-color: white;
     gridline-color: #F1F5F9;
-    font-size: 12px;
+    font-size: 13px;
     selection-background-color: #EFF6FF;
     selection-color: #1E293B;
+    margin: 0;
 }
 
 QTableWidget::item {
-    padding: 6px;
+    padding: 10px;
 }
 
 QHeaderView::section {
-    background-color: #F8FAFC;
+    background-color: #F1F5F9;
     border: none;
-    border-bottom: 2px solid #E2E8F0;
-    padding: 8px 6px;
-    font-weight: 600;
+    border-bottom: 2px solid #CBD5E1;
+    padding: 12px 8px;
+    font-weight: 700;
     font-size: 12px;
-    color: #64748B;
+    color: #475569;
+    text-transform: capitalize;
 }
 
 QProgressBar {

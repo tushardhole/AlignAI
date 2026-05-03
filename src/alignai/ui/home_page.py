@@ -54,12 +54,18 @@ class HomePage(QWidget):
 
         self.table = QTableWidget(0, 8)
         self.table.setHorizontalHeaderLabels(
-            ["Job", "Job link", "Resume PDF", "Cover PDF", "Match", "ATS", "Label", ""]
+            ["Job", "Job link", "Resume PDF", "Cover PDF", "Match", "ATS", "Label", "Delete"]
         )
-        self.table.horizontalHeader().setStretchLastSection(False)
-        self.table.setColumnWidth(7, 80)
+        header = self.table.horizontalHeader()
+        header.setStretchLastSection(False)
+        header.setSectionResizeMode(0, header.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, header.ResizeMode.Stretch)
+        for col in range(2, 7):
+            header.setSectionResizeMode(col, header.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(7, header.ResizeMode.ResizeToContents)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+        self.table.setColumnWidth(7, 50)
         self.table.cellClicked.connect(self._on_cell_clicked)
         layout.addWidget(self.table)
         self.refresh_table()
@@ -70,7 +76,7 @@ class HomePage(QWidget):
         for align in rows:
             row = self.table.rowCount()
             self.table.insertRow(row)
-            self.table.setRowHeight(row, 36)
+            self.table.setRowHeight(row, 42)
             title = align.job_posting.title
             disp = title if len(title) <= 40 else title[:37] + "…"
             link = align.job_posting.url
@@ -93,9 +99,13 @@ class HomePage(QWidget):
             bold.setBold(True)
             label_item.setFont(bold)
             self.table.setItem(row, 6, label_item)
-            btn_delete = QPushButton("Delete")
+            btn_delete = QPushButton("×")
             btn_delete.setProperty("secondary", True)
-            btn_delete.setMaximumSize(70, 28)
+            btn_delete.setMaximumSize(32, 32)
+            btn_delete.setToolTip("Delete alignment")
+            btn_delete.setStyleSheet(
+                "font-size: 18px; font-weight: bold; padding: 0px; color: #DC2626;"
+            )
             btn_delete.clicked.connect(
                 lambda checked, aid=align.id: self._on_delete_clicked(aid)
             )

@@ -51,10 +51,13 @@ def _build_create_alignment(
     runner = AlignAiAgentRunner(openai_client, model, settings_store)
     from pathlib import Path
 
+    from alignai.infra.template_renderer import TemplateRenderer
+
     return CreateAlignment(
         runner,
         alignment_repo,
         pdf_renderer,
+        TemplateRenderer(),
         Path(str(data_dir)),
         sanitize_text=clean,
     )

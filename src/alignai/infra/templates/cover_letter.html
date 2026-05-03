@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cover Letter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #2c3e50;
+            background-color: white;
+            padding: 1in 0.75in;
+        }
+        .container {
+            max-width: 6.5in;
+        }
+        .date {
+            margin-bottom: 0.3in;
+            color: #34495e;
+        }
+        .greeting {
+            margin-bottom: 0.2in;
+            margin-top: 0.2in;
+        }
+        .body {
+            line-height: 1.5;
+            margin-bottom: 0.15in;
+        }
+        .paragraph {
+            margin-bottom: 0.15in;
+            text-align: justify;
+        }
+        .closing {
+            margin-top: 0.3in;
+            margin-bottom: 0.1in;
+        }
+        .signature-name {
+            margin-top: 0.5in;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Date -->
+        <div class="date">{{ date }}</div>
+
+        <!-- Greeting -->
+        <div class="greeting">Dear Hiring Manager,</div>
+
+        <!-- Body Paragraphs -->
+        <div class="body">
+            {% for paragraph in paragraphs %}
+            <div class="paragraph">{{ paragraph }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Closing -->
+        <div class="closing">Regards,</div>
+
+        <!-- Signature -->
+        <div class="signature-name">{{ candidate_name }}</div>
+    </div>
+</body>
+</html>

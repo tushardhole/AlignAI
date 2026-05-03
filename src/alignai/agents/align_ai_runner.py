@@ -68,12 +68,23 @@ class AlignAiAgentRunner:
         else:
             resume_text = await self._steps.single_resume(inputs.resume, jp, brief)
         cover_text = await self._steps.cover_letter(inputs.cover_letter, jp, brief)
+
         ats_coro = self._steps.ats_score(resume_text, cover_text, jp)
         match_coro = self._steps.match_score(resume_text, cover_text, jp)
-        ats_out, match_out = await asyncio.gather(ats_coro, match_coro)
+        struct_resume_coro = self._steps.structure_resume(resume_text)
+        struct_cover_coro = self._steps.structure_cover_letter(cover_text)
+
+        ats_out, match_out, struct_resume, struct_cover = await asyncio.gather(
+            ats_coro,
+            match_coro,
+            struct_resume_coro,
+            struct_cover_coro,
+        )
         return AlignmentResult(
             aligned_resume_content=resume_text,
             aligned_cover_letter_content=cover_text,
+            structured_resume=struct_resume.model_dump(),
+            structured_cover_letter=struct_cover.model_dump(),
             ats_score=ats_out.score,
             match_score=match_out.score,
             match_label=match_out.label,

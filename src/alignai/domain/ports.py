@@ -9,7 +9,7 @@ may import from infra/, agents/, or ui/.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -122,6 +122,15 @@ class TelegramCredentialsVerifier(Protocol):
     """Checks that a Telegram bot token is accepted by the Bot API."""
 
     async def verify_bot_token(self, token: str) -> bool: ...
+
+
+@runtime_checkable
+class TemplateRenderer(Protocol):
+    """Renders structured data into HTML using templates."""
+
+    def render_resume(self, resume_data: dict[str, Any]) -> str: ...
+
+    def render_cover_letter(self, cover_letter_data: dict[str, Any]) -> str: ...
 
 
 @runtime_checkable

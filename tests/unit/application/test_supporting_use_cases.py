@@ -159,10 +159,13 @@ async def test_telegram_flow_url_and_align_handle_text(tmp_path: Path) -> None:
 
     jp = JobPosting(url="https://jobs.example.com/1", title="Role", description="Do things")
     repo = SqliteAlignmentRepository(tmp_path / "db.sqlite")
+    from alignai.infra.template_renderer import TemplateRenderer
+
     create_uc = CreateAlignment(
         FakeAgentRunner(),
         repo,
         RecordingPdfRenderer(),
+        TemplateRenderer(),
         tmp_path,
         sanitize_text=clean,
     )

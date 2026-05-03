@@ -91,6 +91,8 @@ select = [
     "RUF",      # ruff-specific rules
 ]
 ignore = [
+    "ANN101",  # self type annotation not required (deprecated in ruff)
+    "ANN102",  # cls type annotation not required (deprecated in ruff)
     "ANN401",  # allow Any in limited cases (will be caught by mypy)
     "TCH",  # keep imports at top for infra/SDK modules (type-checking moves hurt readability)
 ]
@@ -124,8 +126,20 @@ module = [
     "telegram.*",
     "keyring.*",
     "import_linter.*",
+    "jinja2.*",
+    "agents.*",
+    "pypdf.*",
+    "platformdirs.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "alignai.agents.*",
+    "alignai.infra.keyring_secrets",
+    "alignai.infra.telegram_bridge",
+]
+warn_return_any = false
 
 # ---------------------------------------------------------------------------
 # Pytest

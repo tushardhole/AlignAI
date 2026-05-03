@@ -13,7 +13,6 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QLineEdit,
-    QMessageBox,
     QVBoxLayout,
 )
 
@@ -36,6 +35,31 @@ from alignai.ui.blocking_runner_thread import BlockingRunnerThread
 from alignai.ui.main_window import MainDeps, MainWindow
 
 
+def _build_create_alignment(
+    settings_store: JsonSettingsStore,
+    secrets: KeyringSecrets,
+    alignment_repo: SqliteAlignmentRepository,
+    pdf_renderer: ChromiumPdfRenderer,
+    data_dir: object,
+) -> CreateAlignment:
+    base_url = settings_store.get("llm_base_url") or "https://api.openai.com/v1"
+    model = settings_store.get("llm_model") or "gpt-4o-mini"
+    api_key = secrets.get("llm_api_key") or "dummy-key"
+    openai_client = AsyncOpenAI(base_url=base_url, api_key=api_key)
+    set_default_openai_client(openai_client, use_for_tracing=False)
+    set_default_openai_api("chat_completions")
+    runner = AlignAiAgentRunner(openai_client, model, settings_store)
+    from pathlib import Path
+
+    return CreateAlignment(
+        runner,
+        alignment_repo,
+        pdf_renderer,
+        Path(str(data_dir)),
+        sanitize_text=clean,
+    )
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     qt_app = QApplication(sys.argv)
@@ -49,33 +73,14 @@ def main() -> None:
     if needs_setup and not _run_onboarding(settings_store, secrets):
         sys.exit(0)
 
-    base_url = settings_store.get("llm_base_url") or "https://api.openai.com/v1"
-    model = settings_store.get("llm_model") or "gpt-4o-mini"
-    api_key = secrets.get("llm_api_key") or ""
-    if not api_key.strip():
-        QMessageBox.warning(
-            None,
-            "AlignAI",
-            "No LLM API key found. Add one via onboarding or OS keyring (llm_api_key).",
-        )
-
-    openai_client = AsyncOpenAI(base_url=base_url, api_key=api_key or "dummy-key")
-    set_default_openai_client(openai_client, use_for_tracing=False)
-    set_default_openai_api("chat_completions")
-
     extractor = PdfDocxTextExtractor()
     documents = FilesystemDocumentRepository(data_dir, settings_store, extractor)
     alignment_repo = SqliteAlignmentRepository(data_dir / "alignments.sqlite")
-
-    runner = AlignAiAgentRunner(openai_client, model, settings_store)
     pdf_renderer = ChromiumPdfRenderer()
     job_fetcher = ChainedJobFetcher()
-    create_uc = CreateAlignment(
-        runner,
-        alignment_repo,
-        pdf_renderer,
-        data_dir,
-        sanitize_text=clean,
+
+    create_uc = _build_create_alignment(
+        settings_store, secrets, alignment_repo, pdf_renderer, data_dir
     )
     list_uc = ListAlignments(alignment_repo)
     set_docs_uc = SetBaseDocuments(documents)
@@ -88,10 +93,18 @@ def main() -> None:
         job_fetcher=job_fetcher,
     )
 
+    def rebuild_llm() -> CreateAlignment:
+        return _build_create_alignment(
+            settings_store, secrets, alignment_repo, pdf_renderer, data_dir
+        )
+
     window = MainWindow(
         deps,
         settings_store.get,
         settings_store.set,
+        secrets.get,
+        secrets.set,
+        rebuild_llm,
     )
     window.show()
 

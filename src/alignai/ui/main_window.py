@@ -32,7 +32,6 @@ from alignai.ui.home_page import HomePage
 from alignai.ui.new_alignment_page import NewAlignmentPage
 from alignai.ui.result_page import ResultPage
 from alignai.ui.settings_page import SettingsPage
-from alignai.ui.styles import APP_STYLESHEET
 
 
 @dataclass
@@ -67,7 +66,6 @@ class MainWindow(QMainWindow):
         self._rebuild_llm = rebuild_llm
         self.setWindowTitle("AlignAI")
         self.resize(1000, 640)
-        self.setStyleSheet(APP_STYLESHEET)
 
         self._stack = QStackedWidget()
         self.setCentralWidget(self._stack)

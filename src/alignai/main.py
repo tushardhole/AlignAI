@@ -63,6 +63,10 @@ def _build_create_alignment(
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     qt_app = QApplication(sys.argv)
+    qt_app.setStyle("Fusion")
+    from alignai.ui.styles import APP_STYLESHEET
+
+    qt_app.setStyleSheet(APP_STYLESHEET)
 
     config_dir = resolve_config_dir()
     data_dir = resolve_data_dir()

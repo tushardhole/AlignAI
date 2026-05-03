@@ -18,6 +18,7 @@ from alignai.domain.models import (
     AlignmentInputs,
     AtsScore,
     MatchScore,
+    label_from_score,
 )
 from alignai.domain.ports import AgentRunner, AlignmentRepository, PdfRenderer
 
@@ -75,7 +76,7 @@ class CreateAlignment:
             aligned_cover_letter=AlignedCoverLetter(content=cover_txt, file_path=cover_pdf),
             ats_score=AtsScore(raw.ats_score),
             match_score=MatchScore(raw.match_score),
-            match_label=raw.match_label,
+            match_label=label_from_score(raw.match_score),
             created_at=datetime.now(UTC),
         )
         self._alignment_repository.save(entity)

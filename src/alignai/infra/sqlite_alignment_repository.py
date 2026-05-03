@@ -14,8 +14,8 @@ from alignai.domain.models import (
     AlignmentId,
     AtsScore,
     JobPosting,
-    MatchLabel,
     MatchScore,
+    label_from_score,
 )
 
 
@@ -119,13 +119,14 @@ class SqliteAlignmentRepository:
         )
         created_raw = str(row["created_at"])
         created = datetime.fromisoformat(created_raw.replace("Z", "+00:00"))
+        match_score = MatchScore(int(str(row["match_score"])))
         return Alignment(
             id=AlignmentId(str(row["id"])),
             job_posting=jp,
             aligned_resume=aligned_resume,
             aligned_cover_letter=aligned_cover,
             ats_score=AtsScore(int(str(row["ats_score"]))),
-            match_score=MatchScore(int(str(row["match_score"]))),
-            match_label=MatchLabel(str(row["match_label"])),
+            match_score=match_score,
+            match_label=label_from_score(match_score.value),
             created_at=created,
         )

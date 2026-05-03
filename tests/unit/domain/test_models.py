@@ -13,6 +13,7 @@ from alignai.domain.models import (
     ParsedResume,
     Resume,
     ResumeSection,
+    label_from_score,
 )
 
 
@@ -155,6 +156,39 @@ class TestMatchLabel:
     def test_str_enum_equality(self) -> None:
         assert MatchLabel.STRONG_MATCH == "Strong Match"
         assert MatchLabel.GOOD_MATCH == "Good Match"
+
+
+def test_label_from_score() -> None:
+    """Match labels are deterministically derived from numeric score."""
+    assert label_from_score(5) == MatchLabel.STRONG_MATCH
+    assert label_from_score(4) == MatchLabel.GOOD_MATCH
+    assert label_from_score(3) == MatchLabel.FAIR_MATCH
+    assert label_from_score(2) == MatchLabel.LOW_MATCH
+    assert label_from_score(1) == MatchLabel.WEAK_MATCH
+    assert label_from_score(0) == MatchLabel.FAIR_MATCH
+    assert label_from_score(6) == MatchLabel.FAIR_MATCH
+
+
+class TestLabelFromScore:
+    def test_score_5_strong_match(self) -> None:
+        assert label_from_score(5) == MatchLabel.STRONG_MATCH
+
+    def test_score_4_good_match(self) -> None:
+        assert label_from_score(4) == MatchLabel.GOOD_MATCH
+
+    def test_score_3_fair_match(self) -> None:
+        assert label_from_score(3) == MatchLabel.FAIR_MATCH
+
+    def test_score_2_low_match(self) -> None:
+        assert label_from_score(2) == MatchLabel.LOW_MATCH
+
+    def test_score_1_weak_match(self) -> None:
+        assert label_from_score(1) == MatchLabel.WEAK_MATCH
+
+    def test_invalid_score_defaults_to_fair_match(self) -> None:
+        assert label_from_score(0) == MatchLabel.FAIR_MATCH
+        assert label_from_score(6) == MatchLabel.FAIR_MATCH
+        assert label_from_score(-1) == MatchLabel.FAIR_MATCH
 
 
 class TestAlignmentResult:

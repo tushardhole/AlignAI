@@ -5,12 +5,36 @@ from __future__ import annotations
 import asyncio
 
 from agents import Agent, Runner
+from agents.model_settings import ModelSettings
 
 from alignai.agents.job_brief_fields import JobBriefFields
 from alignai.agents.merged_resume_fields import MergedResumeFields
 from alignai.agents.parsed_resume_fields import ParsedResumeFields, ResumeSectionFields
 from alignai.agents.section_aligned_fields import SectionAlignedFields
 from alignai.domain.models import JobPosting
+
+_RESUME_PARSER_JSON_OBJECT_SHAPE = (
+    " Output valid, complete JSON only. Strongly prefer "
+    '{"sections":[{"heading": string, "content": string}, ...]} '
+    "with one entry per resume area and jobs/dates as plain text inside the Experience "
+    "section content (fewer nesting errors). "
+    "If you use structured keys (Profile, Summary, Skills), then Experience, Experiences, "
+    "Employment, and employment MUST be JSON arrays of job objects, e.g. "
+    '"Experience":[{"Employer":"Acme","Title":"Role","Duration":"2020-2024",'
+    '"Responsibilities":["..."]}], '
+    "never use Experience as a single object wrapping job objects; use an array as shown. "
+    'INVALID: \"Experience\":{\"Employer\":\"Acme\"}. '
+    'VALID: \"Experience\":[{\"Employer\":\"Acme\"}]. '
+    "Close all brackets and braces. Avoid deep nesting."
+)
+
+_MERGER_OUTPUT_HINT = (
+    " Your JSON must have exactly one top-level key \"content\". "
+    "Its value is the full resume as one plain-text string (newlines between sections). "
+    "Do not output contact, summary, experience, skills, or education as nested JSON objects "
+    "or arrays — nesting makes responses too long and invalid. "
+    "Only: {\"content\": \"...full resume text...\"}."
+)
 
 
 def _brief_lines(brief: JobBriefFields) -> str:
@@ -25,8 +49,15 @@ def _brief_lines(brief: JobBriefFields) -> str:
 class ChunkedResumeAligner:
     """Three-phase resume alignment when content exceeds the chunking threshold."""
 
-    def __init__(self, model: str) -> None:
+    def __init__(
+        self,
+        model: str,
+        agent_model_settings: ModelSettings,
+        instruction_suffix: str = "",
+    ) -> None:
         self._model = model
+        self._agent_model_settings = agent_model_settings
+        self._instruction_suffix = instruction_suffix
 
     async def run(self, resume_text: str, jp: JobPosting, brief: JobBriefFields) -> str:
         parsed = await self._parse_resume(resume_text)
@@ -43,8 +74,11 @@ class ChunkedResumeAligner:
             instructions=(
                 "Split the resume into ordered sections. "
                 "Headings should mirror typical resume sections."
+                + _RESUME_PARSER_JSON_OBJECT_SHAPE
+                + self._instruction_suffix
             ),
             model=self._model,
+            model_settings=self._agent_model_settings,
             output_type=ParsedResumeFields,
         )
         result = await Runner.run(agent, f"Resume:\n\n{resume_text}")
@@ -61,8 +95,10 @@ class ChunkedResumeAligner:
             instructions=(
                 "Rewrite only this section for the target role. "
                 "Keep employers, dates, and degrees accurate."
+                + self._instruction_suffix
             ),
             model=self._model,
+            model_settings=self._agent_model_settings,
             output_type=SectionAlignedFields,
         )
         prompt = (
@@ -86,8 +122,11 @@ class ChunkedResumeAligner:
             name="ResumeMerger",
             instructions=(
                 "Integrate into one cohesive resume. Remove redundancy; never invent employers."
+                + _MERGER_OUTPUT_HINT
+                + self._instruction_suffix
             ),
             model=self._model,
+            model_settings=self._agent_model_settings,
             output_type=MergedResumeFields,
         )
         prompt = (

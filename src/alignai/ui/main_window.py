@@ -194,9 +194,7 @@ class MainWindow(QMainWindow):
                 cover_letter=cover,
                 job_posting=jp,
             )
-            result = await self._deps.create_alignment.execute(inputs)
-            assert isinstance(result, Alignment)
-            return result
+            return await self._deps.create_alignment.execute(inputs)
 
         self._align_thr = AsyncRunnerThread(align())
         self._align_thr.finished_ok.connect(self._show_alignment_result)

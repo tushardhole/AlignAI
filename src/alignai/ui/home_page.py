@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from collections.abc import Callable
+from pathlib import Path
 
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QColor, QDesktopServices, QFont
@@ -100,7 +99,7 @@ class HomePage(QWidget):
             bold.setBold(True)
             label_item.setFont(bold)
             self.table.setItem(row, 6, label_item)
-            btn_delete = QPushButton("×")
+            btn_delete = QPushButton("×")  # noqa: RUF001
             btn_delete.setProperty("secondary", True)
             btn_delete.setMaximumSize(32, 32)
             btn_delete.setToolTip("Delete alignment")

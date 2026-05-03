@@ -63,6 +63,7 @@
             line-height: 1.08;
             color: #2d2d2d;
             margin-top: 1pt;
+            text-align: justify;
         }
         .skill-row {
             font-size: 9.5pt;
@@ -107,20 +108,21 @@
             font-size: 9.5pt;
         }
         .exp-bullets {
-            margin-left: 0.2in;
+            margin-left: 0.12in;
             margin-top: 0.5pt;
         }
         .exp-bullet {
             font-size: 9.5pt;
-            line-height: 1.05;
+            line-height: 1.08;
             margin-bottom: 0.5pt;
             margin-top: 0.5pt;
             color: #2d2d2d;
+            text-align: justify;
         }
         .exp-tech {
             font-size: 9pt;
             color: #555;
-            margin-left: 0.2in;
+            margin-left: 0.12in;
             margin-top: 1pt;
             line-height: 1.05;
         }
@@ -398,9 +400,11 @@
         {% for extra in extra_sections|default([]) %}
         <div class="section">
             <div class="section-title">{{ extra.title }}</div>
+            <div class="exp-bullets">
             {% for line in extra.lines %}
-            <div class="text-section">{{ line }}</div>
+                <div class="exp-bullet">&bull;&nbsp; {{ line }}</div>
             {% endfor %}
+            </div>
         </div>
         {% endfor %}
     </div>

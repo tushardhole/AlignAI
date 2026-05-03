@@ -210,10 +210,15 @@ class AlignAiAgentSteps:
             name="ResumeStructurer",
             instructions=(
                 "Convert this plain-text resume into structured JSON. "
-                "Extract all sections accurately. Do not invent or modify content — "
-                "only restructure into the schema. Include all sections present. "
-                "For experience entries, preserve exact bullet points and metadata lines "
-                "(Tech:, Tools:, Specialties: etc. go into the meta array)."
+                "CRITICAL RULES: "
+                "1) Include EVERY bullet point exactly as written — do NOT summarize, "
+                "shorten, or omit any bullets. "
+                "2) For each experience entry, if there is a line like "
+                "'Tech: Python, Go' or 'Tools: Docker, K8s' or 'Stack: ...' "
+                'put it in the meta array as {"label": "Tech", "value": "Python, Go"}. '
+                "3) Do not modify, rephrase, or drop any content. "
+                "4) Open source contributions, side projects, and similar sections "
+                "should go into extra_sections with each contribution as a separate line."
                 + _RESUME_STRUCTURE_SCHEMA_HINT
                 + self._instruction_suffix
             ),

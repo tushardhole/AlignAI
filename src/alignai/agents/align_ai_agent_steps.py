@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from agents import Agent, Runner
+from agents import Agent, AgentOutputSchema, Runner
 from agents.model_settings import ModelSettings
 
 from alignai.agents.aligned_cover_letter_fields import AlignedCoverLetterFields
@@ -219,7 +219,7 @@ class AlignAiAgentSteps:
             ),
             model=self._model,
             model_settings=self._agent_model_settings,
-            output_type=StructuredResumeFields,
+            output_type=AgentOutputSchema(StructuredResumeFields, strict_json_schema=False),
         )
         result = await Runner.run(agent, f"Resume text:\n\n{resume_text}")
         return result.final_output_as(StructuredResumeFields, raise_if_incorrect_type=True)
@@ -237,7 +237,7 @@ class AlignAiAgentSteps:
             ),
             model=self._model,
             model_settings=self._agent_model_settings,
-            output_type=StructuredCoverLetterFields,
+            output_type=AgentOutputSchema(StructuredCoverLetterFields, strict_json_schema=False),
         )
         result = await Runner.run(agent, f"Cover letter:\n\n{cover_text}")
         return result.final_output_as(StructuredCoverLetterFields, raise_if_incorrect_type=True)

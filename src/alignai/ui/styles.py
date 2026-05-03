@@ -27,10 +27,11 @@ QPushButton {
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 8px 20px;
+    padding: 8px 16px;
     font-size: 13px;
     font-weight: 600;
-    min-height: 20px;
+    min-height: 24px;
+    min-width: 40px;
     outline: none;
 }
 
@@ -56,6 +57,9 @@ QPushButton:disabled {
 QPushButton[secondary="true"] {
     background-color: #E2E8F0;
     color: #334155;
+    padding: 8px 16px;
+    min-height: 24px;
+    min-width: 40px;
 }
 
 QPushButton[secondary="true"]:hover {

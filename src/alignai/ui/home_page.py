@@ -29,7 +29,7 @@ class HomePage(QWidget):
     """Past alignments table and navigation buttons."""
 
     def __init__(
-        self,
+        self: HomePage,
         list_alignments: ListAlignments,
         on_delete: Callable[[AlignmentId], None] | None = None,
     ) -> None:
@@ -42,11 +42,21 @@ class HomePage(QWidget):
         top = QHBoxLayout()
         title = QLabel("Past Alignments")
         title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        self.btn_refresh = QPushButton("↻")
+        self.btn_refresh.setProperty("secondary", True)
+        self.btn_refresh.setMinimumSize(40, 32)
+        self.btn_refresh.setMaximumSize(50, 40)
+        self.btn_refresh.setToolTip("Refresh alignments")
+        self.btn_refresh.setStyleSheet(
+            "font-size: 20px; font-weight: bold; padding: 4px 6px; color: #334155;"
+        )
         self.btn_new = QPushButton("+ New Alignment")
         self.btn_settings = QPushButton("Settings")
         self.btn_settings.setProperty("secondary", True)
         self.btn_settings.setMinimumWidth(110)
         top.addWidget(title)
+        top.addSpacing(12)
+        top.addWidget(self.btn_refresh)
         top.addStretch()
         top.addWidget(self.btn_settings)
         top.addWidget(self.btn_new)
@@ -67,10 +77,11 @@ class HomePage(QWidget):
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setColumnWidth(7, 50)
         self.table.cellClicked.connect(self._on_cell_clicked)
+        self.btn_refresh.clicked.connect(self.refresh_table)
         layout.addWidget(self.table)
         self.refresh_table()
 
-    def refresh_table(self) -> None:
+    def refresh_table(self: HomePage) -> None:
         rows = self._list_uc.execute()
         self.table.setRowCount(0)
         for align in rows:
@@ -120,7 +131,7 @@ class HomePage(QWidget):
             item.setData(Qt.ItemDataRole.UserRole, str(path))
         return item
 
-    def _on_cell_clicked(self, row: int, col: int) -> None:
+    def _on_cell_clicked(self: HomePage, row: int, col: int) -> None:
         if col not in (2, 3):
             return
         item = self.table.item(row, col)
@@ -132,7 +143,7 @@ class HomePage(QWidget):
             if path.exists():
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
 
-    def _on_delete_clicked(self, alignment_id: AlignmentId) -> None:
+    def _on_delete_clicked(self: HomePage, alignment_id: AlignmentId) -> None:
         reply = QMessageBox.warning(
             self,
             "Delete Alignment",

@@ -130,3 +130,8 @@ class SqliteAlignmentRepository:
             match_label=label_from_score(match_score.value),
             created_at=created,
         )
+
+    def delete(self, alignment_id: AlignmentId) -> None:
+        with closing(self._connect()) as conn:
+            conn.execute("DELETE FROM alignments WHERE id = ?", (str(alignment_id),))
+            conn.commit()

@@ -26,7 +26,7 @@ from alignai.domain.models import (
     Resume,
     UnreadableJob,
 )
-from alignai.domain.ports import DocumentRepository, JobFetcher
+from alignai.domain.ports import AlignmentRepository, DocumentRepository, JobFetcher
 from alignai.ui.async_runner_thread import AsyncRunnerThread
 from alignai.ui.home_page import HomePage
 from alignai.ui.new_alignment_page import NewAlignmentPage
@@ -43,6 +43,7 @@ class MainDeps:
     set_base_documents: SetBaseDocuments
     documents: DocumentRepository
     job_fetcher: JobFetcher
+    alignment_repo: AlignmentRepository
 
 
 class MainWindow(QMainWindow):
@@ -70,7 +71,7 @@ class MainWindow(QMainWindow):
         self._stack = QStackedWidget()
         self.setCentralWidget(self._stack)
 
-        self._home_page = HomePage(deps.list_alignments)
+        self._home_page = HomePage(deps.list_alignments, on_delete=deps.alignment_repo.delete)
         self._new_page = NewAlignmentPage()
         self._result_page = ResultPage()
         self._settings_page = SettingsPage()

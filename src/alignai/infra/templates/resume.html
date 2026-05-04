@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #2c3e50;
+            background-color: white;
+            padding: 0.75in;
+        }
+        .container {
+            max-width: 8.5in;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 0.3in;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 0.15in;
+        }
+        .name {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 0.05in;
+        }
+        .contact-info {
+            font-size: 10pt;
+            color: #34495e;
+        }
+        .contact-item {
+            display: inline-block;
+            margin-right: 0.3in;
+        }
+        .section {
+            margin-top: 0.2in;
+            margin-bottom: 0.1in;
+        }
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #2c3e50;
+            text-transform: uppercase;
+            border-bottom: 1px solid #95a5a6;
+            padding-bottom: 0.05in;
+            margin-bottom: 0.08in;
+        }
+        .entry {
+            margin-bottom: 0.12in;
+        }
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.02in;
+        }
+        .entry-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .entry-date {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        .entry-subtitle {
+            color: #34495e;
+            font-style: italic;
+            margin-bottom: 0.02in;
+        }
+        .bullets {
+            margin-left: 0.2in;
+            margin-top: 0.02in;
+        }
+        .bullet {
+            margin-bottom: 0.03in;
+            line-height: 1.35;
+        }
+        .summary {
+            line-height: 1.4;
+            margin-bottom: 0.08in;
+        }
+        .skills-list {
+            column-count: 2;
+            column-gap: 0.3in;
+        }
+        .skill-item {
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 0.03in;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Name and Contact Info -->
+        <div class="header">
+            <div class="name">{{ name }}</div>
+            <div class="contact-info">
+                {% if email %}<span class="contact-item">{{ email }}</span>{% endif %}
+                {% if phone %}<span class="contact-item">{{ phone }}</span>{% endif %}
+                {% if location %}<span class="contact-item">{{ location }}</span>{% endif %}
+            </div>
+        </div>
+
+        <!-- Professional Summary -->
+        {% if summary %}
+        <div class="section">
+            <div class="section-title">Professional Summary</div>
+            <div class="summary">{{ summary }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Experience Section -->
+        {% if experience %}
+        <div class="section">
+            <div class="section-title">Professional Experience</div>
+            {% for job in experience %}
+            <div class="entry">
+                <div class="entry-header">
+                    <span class="entry-title">{{ job.title }}</span>
+                    {% if job.dates %}<span class="entry-date">{{ job.dates }}</span>{% endif %}
+                </div>
+                {% if job.company %}<div class="entry-subtitle">{{ job.company }}</div>{% endif %}
+                {% if job.bullets %}
+                <div class="bullets">
+                    {% for bullet in job.bullets %}
+                    <div class="bullet">• {{ bullet }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Education Section -->
+        {% if education %}
+        <div class="section">
+            <div class="section-title">Education</div>
+            {% for edu in education %}
+            <div class="entry">
+                <div class="entry-header">
+                    <span class="entry-title">{{ edu.degree }}</span>
+                    {% if edu.graduation_date %}<span class="entry-date">{{ edu.graduation_date }}</span>{% endif %}
+                </div>
+                {% if edu.school %}<div class="entry-subtitle">{{ edu.school }}</div>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Skills Section -->
+        {% if skills %}
+        <div class="section">
+            <div class="section-title">Skills</div>
+            <div class="skills-list">
+                {% for skill in skills %}
+                <div class="skill-item">{{ skill }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

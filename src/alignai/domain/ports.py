@@ -88,6 +88,15 @@ class PdfRenderer(Protocol):
 
 
 @runtime_checkable
+class TemplateRenderer(Protocol):
+    """Renders structured data into professional HTML documents using templates."""
+
+    def render_resume(self, resume_data: dict[str, object]) -> str: ...
+
+    def render_cover_letter(self, cover_letter_data: dict[str, object]) -> str: ...
+
+
+@runtime_checkable
 class NotificationChannel(Protocol):
     """Sends text messages and document attachments to a recipient."""
 

@@ -57,6 +57,7 @@
             margin-bottom: 1pt;
             border-bottom: 1px solid #999;
             letter-spacing: 0.3pt;
+            page-break-after: avoid;
         }
         .summary {
             font-size: 9.5pt;
@@ -229,14 +230,14 @@
         </div>
 
         {% if summary %}
-        <div class="section">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Summary</div>
             <div class="summary">{{ summary }}</div>
         </div>
         {% endif %}
 
         {% if skills_by_category %}
-        <div class="section">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Skills</div>
             {% for category, skill_list in skills_by_category.items() %}
             <div class="skill-row">
@@ -301,7 +302,7 @@
         {% endif %}
 
         {% if education %}
-        <div class="section">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Education</div>
             {% for edu in education %}
             <div class="edu-entry">
@@ -333,7 +334,7 @@
         {% endif %}
 
         {% if awards %}
-        <div class="section">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Awards &amp; Recognition</div>
             {% for award in awards %}
             <div class="award-entry">
@@ -349,7 +350,7 @@
         {% endif %}
 
         {% if publications %}
-        <div class="section">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Publications</div>
             {% for pub in publications %}
             <div class="pub-entry">
@@ -393,7 +394,7 @@
         {% endif %}
 
         {% if affiliations %}
-        <div class="section">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Professional Affiliations</div>
             {% for aff in affiliations %}
             <div class="cert-entry">{{ aff }}</div>

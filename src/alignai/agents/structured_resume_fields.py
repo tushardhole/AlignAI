@@ -325,8 +325,20 @@ def _normalize_extra_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
     for item in hit:
         if isinstance(item, dict):
-            title = _str_field(item, "title", "heading", "name")
-            lines = coerce_str_list(find_value(item, "lines", "content", "items") or [])
+            title = _str_field(
+                item,
+                "title",
+                "heading",
+                "name",
+                "section",
+                "section_name",
+                "sectionName",
+                "header",
+                "label",
+            )
+            lines = coerce_str_list(
+                find_value(item, "lines", "content", "items", "entries", "bullets") or []
+            )
             result.append({"title": title, "lines": lines})
     return result
 
@@ -412,6 +424,18 @@ def _collect_unrecognized_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
         if isinstance(val, list) and val:
             lines = coerce_str_list(val)
             if lines:
-                title = key.replace("_", " ").replace("-", " ").title()
+                title = _key_to_title(key)
                 result.append({"title": title, "lines": lines})
     return result
+
+
+def _key_to_title(key: str) -> str:
+    """Convert a key like 'open_source_contributions' or 'OpenSourceContributions' to title."""
+    import re
+
+    if "_" in key or "-" in key:
+        return key.replace("_", " ").replace("-", " ").title()
+    parts = re.sub(r"([A-Z])", r" \1", key).split()
+    if parts:
+        return " ".join(parts).title()
+    return key.title()

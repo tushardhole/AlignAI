@@ -311,7 +311,7 @@
                 <span class="edu-school">{{ edu.school }}</span>
                 {% endif %}
                 {% if edu.location %}
-                <span class="edu-sep">&mdash;</span>
+                <span class="edu-sep">,</span>
                 <span class="edu-school">{{ edu.location }}</span>
                 {% endif %}
             </div>
@@ -320,7 +320,7 @@
         {% endif %}
 
         {% if certifications %}
-        <div class="section" style="page-break-before: avoid;">
+        <div class="section" style="page-break-inside: avoid;">
             <div class="section-title">Certifications</div>
             {% for cert in certifications %}
             <div class="cert-entry">

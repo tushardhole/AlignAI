@@ -285,7 +285,7 @@
 
         {% if projects %}
         <div class="section">
-            <div class="section-title">{{ projects_title|default('Projects') }}</div>
+            <div class="section-title">{{ projects_title or 'Projects' }}</div>
             {% for proj in projects %}
             <div class="project-entry">
                 <span class="project-name">{{ proj.name }}</span>

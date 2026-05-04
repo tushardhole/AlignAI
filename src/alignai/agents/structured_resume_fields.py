@@ -83,6 +83,10 @@ def _normalize_resume_dict(raw: dict[str, Any]) -> dict[str, Any]:
     )
     out["extra_sections"] = _normalize_extra_sections(raw)
     out["extra_sections"] += _collect_unrecognized_sections(raw)
+    out["extra_sections"] = _deduplicate_extra_vs_projects(
+        out["extra_sections"],
+        out["projects"],
+    )
 
     return out
 
@@ -457,3 +461,28 @@ def _key_to_title(key: str) -> str:
     spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", key)
     spaced = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", spaced)
     return " ".join(w[0].upper() + w[1:] for w in spaced.split())
+
+
+def _deduplicate_extra_vs_projects(
+    extras: list[dict[str, Any]],
+    projects: list[dict[str, str]],
+) -> list[dict[str, Any]]:
+    """Remove extra sections whose lines substantially overlap with projects."""
+    if not projects:
+        return extras
+    proj_words = set()
+    for p in projects:
+        for val in p.values():
+            proj_words.update(val.lower().split()[:5])
+    result: list[dict[str, Any]] = []
+    for section in extras:
+        lines = section.get("lines", [])
+        if not lines:
+            result.append(section)
+            continue
+        overlap = sum(
+            1 for line in lines if any(w in line.lower() for w in proj_words if len(w) > 4)
+        )
+        if overlap < len(lines) * 0.5:
+            result.append(section)
+    return result

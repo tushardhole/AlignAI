@@ -102,10 +102,25 @@ def _normalize_links(raw: dict[str, Any]) -> list[dict[str, str]]:
         if isinstance(item, dict):
             url = find_value(item, "url", "href", "link") or ""
             display = find_value(item, "display", "text", "label") or url
-            result.append({"url": coerce_str(url), "display": coerce_str(display)})
+            result.append(
+                {
+                    "url": _ensure_url_protocol(coerce_str(url)),
+                    "display": coerce_str(display),
+                }
+            )
         elif isinstance(item, str):
-            result.append({"url": item, "display": item})
+            result.append({"url": _ensure_url_protocol(item), "display": item})
     return result
+
+
+def _ensure_url_protocol(url: str) -> str:
+    """Ensure URL has https:// prefix for proper linking."""
+    url = url.strip()
+    if not url:
+        return url
+    if url.startswith(("http://", "https://", "mailto:")):
+        return url
+    return "https://" + url
 
 
 def _normalize_skills(raw: dict[str, Any]) -> dict[str, list[str]]:

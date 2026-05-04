@@ -58,10 +58,20 @@ def coerce_int(value: Any, low: int, high: int) -> int:
     return low
 
 
+def _coerce_list_item(item: Any) -> str:
+    """Convert a list item to string, handling dicts by joining values."""
+    if isinstance(item, str):
+        return item
+    if isinstance(item, dict):
+        parts = [str(v) for v in item.values() if v and isinstance(v, str)]
+        return " - ".join(parts) if parts else str(item)
+    return str(item)
+
+
 def coerce_str_list(value: Any) -> list[str]:
     """Coerce to a list of strings."""
     if isinstance(value, list):
-        return [str(item) for item in value if item]
+        return [_coerce_list_item(item) for item in value if item]
     if isinstance(value, str):
         items = re.split(r"[,;\n]+", value)
         return [re.sub(r"^\s*\d+[.)]\s*", "", it).strip("- ").strip() for it in items if it.strip()]

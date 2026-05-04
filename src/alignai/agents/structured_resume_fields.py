@@ -83,6 +83,7 @@ def _normalize_resume_dict(raw: dict[str, Any]) -> dict[str, Any]:
     )
     out["extra_sections"] = _normalize_extra_sections(raw)
     out["extra_sections"] += _collect_unrecognized_sections(raw)
+    out["extra_sections"] = _deduplicate_extra_sections(out["extra_sections"])
     out["extra_sections"] = _deduplicate_extra_vs_projects(
         out["extra_sections"],
         out["projects"],
@@ -461,6 +462,23 @@ def _key_to_title(key: str) -> str:
     spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", key)
     spaced = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", spaced)
     return " ".join(w[0].upper() + w[1:] for w in spaced.split())
+
+
+def _deduplicate_extra_sections(
+    extras: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Remove duplicate extra sections by title, keeping the one with more lines."""
+    seen: dict[str, dict[str, Any]] = {}
+    untitled: list[dict[str, Any]] = []
+    for section in extras:
+        title = section.get("title", "").lower().strip()
+        if not title:
+            untitled.append(section)
+            continue
+        existing = seen.get(title)
+        if existing is None or len(section.get("lines", [])) > len(existing.get("lines", [])):
+            seen[title] = section
+    return list(seen.values()) + untitled
 
 
 def _deduplicate_extra_vs_projects(

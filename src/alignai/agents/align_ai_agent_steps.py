@@ -24,7 +24,8 @@ _RESUME_STRUCTURE_SCHEMA_HINT = (
     '"skills_by_category" (object: {"Category Name": ["skill1", "skill2"]}), '
     '"experience" (array of {"title": string, "company": string, "dates": string, '
     '"bullets": [string], "meta": [{"label": string, "value": string}]}), '
-    '"education" (array of {"degree": string, "school": string, "graduation_date": string}), '
+    '"education" (array of {"degree": string, "school": string, '
+    '"location": string, "graduation_date": string}), '
     '"certifications" (array of {"name": string, "issuer": string, "date": string}), '
     '"projects" (array of {"name": string, "link": string, "url": string, "description": string}), '
     '"volunteer" (array of {"title": string, "company": string, '
@@ -109,6 +110,10 @@ class AlignAiAgentSteps:
             name="ResumeAligner",
             instructions=(
                 "Rewrite the resume for this job. Keep facts truthful. "
+                "For each role: keep 4-6 strong bullets that are most relevant to the "
+                "target job. Rephrase to highlight alignment with job requirements. "
+                "Remove only truly redundant or irrelevant bullets. "
+                "Preserve Tech/Tools/Stack lines for each role. "
                 "Plain UTF-8 text only (no markdown fences)." + self._instruction_suffix
             ),
             model=self._model,
@@ -210,14 +215,16 @@ class AlignAiAgentSteps:
             name="ResumeStructurer",
             instructions=(
                 "Convert this plain-text resume into structured JSON. "
-                "CRITICAL RULES: "
-                "1) Include EVERY bullet point exactly as written — do NOT summarize, "
+                "RULES: "
+                "1) Include all bullet points exactly as written — do not summarize, "
                 "shorten, or omit any bullets. "
                 "2) For each experience entry, if there is a line like "
                 "'Tech: Python, Go' or 'Tools: Docker, K8s' or 'Stack: ...' "
                 'put it in the meta array as {"label": "Tech", "value": "Python, Go"}. '
                 "3) Do not modify, rephrase, or drop any content. "
-                "4) Open source contributions, side projects, and similar sections "
+                "4) Preserve the full professional summary exactly as written "
+                "(multiple sentences OK). "
+                "5) Open source contributions, side projects, and similar sections "
                 "should go into extra_sections with each contribution as a separate line."
                 + _RESUME_STRUCTURE_SCHEMA_HINT
                 + self._instruction_suffix

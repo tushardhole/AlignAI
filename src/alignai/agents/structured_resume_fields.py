@@ -200,6 +200,14 @@ def _normalize_education(raw: dict[str, Any]) -> list[dict[str, str]]:
             {
                 "degree": _str_field(item, "degree", "qualification", "program"),
                 "school": _str_field(item, "school", "institution", "university", "college"),
+                "location": _str_field(
+                    item,
+                    "location",
+                    "city",
+                    "address",
+                    "city_state",
+                    "state",
+                ),
                 "graduation_date": _str_field(
                     item,
                     "graduation_date",

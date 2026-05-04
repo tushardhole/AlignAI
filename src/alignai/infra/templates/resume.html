@@ -240,7 +240,7 @@
             <div class="section-title">Skills</div>
             {% for category, skill_list in skills_by_category.items() %}
             <div class="skill-row">
-                <span class="skill-label">{{ category }}:</span>
+                <span class="skill-label">{{ category | title }}:</span>
                 <span class="skill-values">{{ skill_list|join(', ') }}</span>
             </div>
             {% endfor %}
@@ -266,14 +266,14 @@
                 {% if job.bullets %}
                 <div class="exp-bullets">
                     {% for bullet in job.bullets %}
-                    <div class="exp-bullet">&bull;&nbsp; {{ bullet }}</div>
+                    <div class="exp-bullet">●&nbsp; {{ bullet }}</div>
                     {% endfor %}
                 </div>
                 {% endif %}
                 {% for m in job.meta|default([]) %}
                 {% if m.value %}
                 <div class="exp-tech">
-                    <span class="exp-tech-label">{{ m.label }}:</span> {{ m.value }}
+                    <span class="exp-tech-label">{{ m.label | title }}:</span> {{ m.value }}
                 </div>
                 {% endif %}
                 {% endfor %}
@@ -310,13 +310,17 @@
                 <span class="edu-sep">&mdash;</span>
                 <span class="edu-school">{{ edu.school }}</span>
                 {% endif %}
+                {% if edu.location %}
+                <span class="edu-sep">&mdash;</span>
+                <span class="edu-school">{{ edu.location }}</span>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
         {% endif %}
 
         {% if certifications %}
-        <div class="section">
+        <div class="section" style="page-break-before: avoid;">
             <div class="section-title">Certifications</div>
             {% for cert in certifications %}
             <div class="cert-entry">
@@ -379,7 +383,7 @@
                 {% if vol.bullets %}
                 <div class="exp-bullets">
                     {% for bullet in vol.bullets %}
-                    <div class="exp-bullet">&bull;&nbsp; {{ bullet }}</div>
+                    <div class="exp-bullet">●&nbsp; {{ bullet }}</div>
                     {% endfor %}
                 </div>
                 {% endif %}
@@ -398,14 +402,16 @@
         {% endif %}
 
         {% for extra in extra_sections|default([]) %}
+        {% if extra.lines and extra.lines | length > 0 %}
         <div class="section">
             <div class="section-title">{{ extra.title }}</div>
             <div class="exp-bullets">
             {% for line in extra.lines %}
-                <div class="exp-bullet">&bull;&nbsp; {{ line }}</div>
+                <div class="exp-bullet">●&nbsp; {{ line }}</div>
             {% endfor %}
             </div>
         </div>
+        {% endif %}
         {% endfor %}
     </div>
 </body>

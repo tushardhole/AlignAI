@@ -82,6 +82,7 @@ def _normalize_resume_dict(raw: dict[str, Any]) -> dict[str, Any]:
         keys=("title", "venue", "date", "description"),
     )
     out["extra_sections"] = _normalize_extra_sections(raw)
+    out["extra_sections"] += _collect_unrecognized_sections(raw)
 
     return out
 
@@ -327,4 +328,90 @@ def _normalize_extra_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
             title = _str_field(item, "title", "heading", "name")
             lines = coerce_str_list(find_value(item, "lines", "content", "items") or [])
             result.append({"title": title, "lines": lines})
+    return result
+
+
+_KNOWN_KEYS = frozenset(
+    {
+        "name",
+        "candidate_name",
+        "candidatename",
+        "full_name",
+        "fullname",
+        "email",
+        "e_mail",
+        "emailaddress",
+        "phone",
+        "telephone",
+        "phone_number",
+        "phonenumber",
+        "location",
+        "city",
+        "address",
+        "city_state",
+        "citystate",
+        "summary",
+        "professional_summary",
+        "professionalsummary",
+        "profile",
+        "objective",
+        "about",
+        "links",
+        "urls",
+        "profiles",
+        "websites",
+        "skills_by_category",
+        "skillsbycategory",
+        "skills",
+        "technical_skills",
+        "technicalskills",
+        "core_competencies",
+        "corecompetencies",
+        "experience",
+        "work_experience",
+        "workexperience",
+        "professional_experience",
+        "professionalexperience",
+        "employment",
+        "employment_history",
+        "education",
+        "academic_background",
+        "academicbackground",
+        "certifications",
+        "licenses",
+        "credentials",
+        "projects",
+        "projects_title",
+        "projectstitle",
+        "volunteer",
+        "volunteer_experience",
+        "volunteerexperience",
+        "affiliations",
+        "professional_affiliations",
+        "professionalaffiliations",
+        "awards",
+        "honors",
+        "recognition",
+        "publications",
+        "papers",
+        "research",
+        "extra_sections",
+        "extrasections",
+        "additional_sections",
+    }
+)
+
+
+def _collect_unrecognized_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
+    """Detect LLM keys not matching known fields and treat them as extra sections."""
+    result: list[dict[str, Any]] = []
+    for key, val in raw.items():
+        norm_key = key.lower().replace(" ", "").replace("-", "").replace("_", "")
+        if norm_key in {k.replace("_", "") for k in _KNOWN_KEYS}:
+            continue
+        if isinstance(val, list) and val:
+            lines = coerce_str_list(val)
+            if lines:
+                title = key.replace("_", " ").replace("-", " ").title()
+                result.append({"title": title, "lines": lines})
     return result

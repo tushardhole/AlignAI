@@ -34,7 +34,7 @@ dependencies = [
     "jinja2>=3.1",
     # Storage & settings
     "platformdirs>=4.2",
-    "keyring>=25.2",
+    "keyring>=25.7.0",
     # Telegram
     "python-telegram-bot>=21.3",
     # Utilities

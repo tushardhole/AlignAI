@@ -403,12 +403,14 @@
         {% endif %}
 
         {% for extra in extra_sections|default([]) %}
-        {% if extra.lines and extra.lines | length > 0 %}
+        {% if extra.title and extra.lines %}
         <div class="section">
             <div class="section-title">{{ extra.title }}</div>
             <div class="exp-bullets">
             {% for line in extra.lines %}
+                {% if line %}
                 <div class="exp-bullet">●&nbsp; {{ line }}</div>
+                {% endif %}
             {% endfor %}
             </div>
         </div>

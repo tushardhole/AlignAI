@@ -323,24 +323,40 @@ def _normalize_extra_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
     if not isinstance(hit, list):
         return []
     result: list[dict[str, Any]] = []
+    _title_keys = (
+        "title",
+        "heading",
+        "name",
+        "section",
+        "section_name",
+        "sectionName",
+        "header",
+        "label",
+    )
+    _lines_keys = ("lines", "content", "items", "entries", "bullets")
     for item in hit:
         if isinstance(item, dict):
-            title = _str_field(
-                item,
-                "title",
-                "heading",
-                "name",
-                "section",
-                "section_name",
-                "sectionName",
-                "header",
-                "label",
-            )
-            lines = coerce_str_list(
-                find_value(item, "lines", "content", "items", "entries", "bullets") or []
-            )
+            title = _str_field(item, *_title_keys)
+            lines = coerce_str_list(find_value(item, *_lines_keys) or [])
+            if not title and not lines:
+                title, lines = _infer_title_from_dict(item, _title_keys, _lines_keys)
             result.append({"title": title, "lines": lines})
     return result
+
+
+def _infer_title_from_dict(
+    item: dict[str, Any],
+    title_keys: tuple[str, ...],
+    lines_keys: tuple[str, ...],
+) -> tuple[str, list[str]]:
+    """Handle LLM format where the key IS the title and the value is the lines."""
+    skip = {k.lower() for k in title_keys + lines_keys}
+    for k, v in item.items():
+        if k.lower() in skip:
+            continue
+        if isinstance(v, list):
+            return _key_to_title(k), coerce_str_list(v)
+    return "", []
 
 
 _KNOWN_KEYS = frozenset(
@@ -430,12 +446,14 @@ def _collect_unrecognized_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _key_to_title(key: str) -> str:
-    """Convert a key like 'open_source_contributions' or 'OpenSourceContributions' to title."""
+    """Convert a key like 'open_source_contributions' or 'PersonalAIProjects' to title."""
     import re
 
     if "_" in key or "-" in key:
-        return key.replace("_", " ").replace("-", " ").title()
-    parts = re.sub(r"([A-Z])", r" \1", key).split()
-    if parts:
-        return " ".join(parts).title()
-    return key.title()
+        words = key.replace("_", " ").replace("-", " ").split()
+        return " ".join(w[0].upper() + w[1:] for w in words)
+    if " " in key:
+        return " ".join(w[0].upper() + w[1:] for w in key.split())
+    spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", key)
+    spaced = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", spaced)
+    return " ".join(w[0].upper() + w[1:] for w in spaced.split())

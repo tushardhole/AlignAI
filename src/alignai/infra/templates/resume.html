@@ -42,7 +42,7 @@
         }
         a {
             color: #446699;
-            text-decoration: none;
+            text-decoration: underline;
         }
         .section {
             margin-top: 7pt;
@@ -307,14 +307,14 @@
             {% for edu in education %}
             <div class="edu-entry">
                 <span class="edu-degree">{{ edu.degree }}</span>
-                {% if edu.school %}
+                {%- if edu.school %}
                 <span class="edu-sep">&mdash;</span>
                 <span class="edu-school">{{ edu.school }}</span>
-                {% endif %}
-                {% if edu.location %}
+                {%- endif %}
+                {%- if edu.location %}
                 <span class="edu-sep">,</span>
                 <span class="edu-school">{{ edu.location }}</span>
-                {% endif %}
+                {%- endif %}
             </div>
             {% endfor %}
         </div>

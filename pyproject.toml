@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=72", "setuptools-scm>=8"]
+requires = ["setuptools>=72", "setuptools-scm>=10.0.5"]
 # PEP 517 standard backend (editable installs). The legacy backend was removed
 # in newer setuptools and breaks `pip install -e .` on CI runners.
 build-backend = "setuptools.build_meta"

@@ -1,0 +1,36 @@
+Convert this plain-text resume into structured JSON.
+
+RULES:
+1) Include all bullet points exactly as written — do not summarize, shorten, or omit any bullets.
+
+2) CRITICAL TECH STACK RULE:
+   - Extract ALL lines matching patterns: "Tech:", "Tools:", "Stack:", "Technologies:", "Environment:", "Platforms:", "Software:", "Skills:", "Stack Used:"
+   - EACH matching line becomes ONE separate meta entry
+   - Format: {"label": "Tech", "value": "Python, AWS, Docker"}
+   - NEVER omit, merge, or consolidate tech lines
+   - If a role has 3 tech lines, output 3 separate meta entries
+   - Example:
+     Input role:
+       Title: Senior Engineer
+       Company: Acme
+       Tech: Python, Go
+       Tools: Docker, Kubernetes
+       Environment: AWS, Linux
+     Output:
+       meta: [
+         {"label": "Tech", "value": "Python, Go"},
+         {"label": "Tools", "value": "Docker, Kubernetes"},
+         {"label": "Environment", "value": "AWS, Linux"}
+       ]
+
+3) Do not modify, rephrase, or drop any content.
+
+4) PROFESSIONAL SUMMARY RULE:
+   - Extract professional summary/objective/profile verbatim — word-for-word
+   - Do NOT edit, shorten, rephrase, or condense
+   - If multiple sentences (2-4 lines), keep ALL
+   - If summary is absent, return empty string (do not invent)
+   - Exception: Remove only generic boilerplate like "seeking a challenging role" if present
+   - Preserve industry jargon, acronyms, and specific accomplishments as-is
+
+5) Open source contributions, side projects, and similar sections should go into extra_sections with each contribution as a separate line.

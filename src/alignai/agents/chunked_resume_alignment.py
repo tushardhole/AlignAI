@@ -10,31 +10,9 @@ from agents.model_settings import ModelSettings
 from alignai.agents.job_brief_fields import JobBriefFields
 from alignai.agents.merged_resume_fields import MergedResumeFields
 from alignai.agents.parsed_resume_fields import ParsedResumeFields, ResumeSectionFields
+from alignai.agents.prompts import load_prompt, load_schema_hint
 from alignai.agents.section_aligned_fields import SectionAlignedFields
 from alignai.domain.models import JobPosting
-
-_RESUME_PARSER_JSON_OBJECT_SHAPE = (
-    " Output valid, complete JSON only. Strongly prefer "
-    '{"sections":[{"heading": string, "content": string}, ...]} '
-    "with one entry per resume area and jobs/dates as plain text inside the Experience "
-    "section content (fewer nesting errors). "
-    "If you use structured keys (Profile, Summary, Skills), then Experience, Experiences, "
-    "Employment, and employment MUST be JSON arrays of job objects, e.g. "
-    '"Experience":[{"Employer":"Acme","Title":"Role","Duration":"2020-2024",'
-    '"Responsibilities":["..."]}], '
-    "never use Experience as a single object wrapping job objects; use an array as shown. "
-    'INVALID: "Experience":{"Employer":"Acme"}. '
-    'VALID: "Experience":[{"Employer":"Acme"}]. '
-    "Close all brackets and braces. Avoid deep nesting."
-)
-
-_MERGER_OUTPUT_HINT = (
-    ' Your JSON must have exactly one top-level key "content". '
-    "Its value is the full resume as one plain-text string (newlines between sections). "
-    "Do not output contact, summary, experience, skills, or education as nested JSON objects "
-    "or arrays — nesting makes responses too long and invalid. "
-    'Only: {"content": "...full resume text..."}.'
-)
 
 
 def _brief_lines(brief: JobBriefFields) -> str:
@@ -72,9 +50,9 @@ class ChunkedResumeAligner:
         agent = Agent(
             name="ResumeParser",
             instructions=(
-                "Split the resume into ordered sections. "
-                "Headings should mirror typical resume sections."
-                + _RESUME_PARSER_JSON_OBJECT_SHAPE
+                load_prompt("resume_parser")
+                + " "
+                + load_schema_hint("resume_parser_shape")
                 + self._instruction_suffix
             ),
             model=self._model,
@@ -92,10 +70,7 @@ class ChunkedResumeAligner:
     ) -> str:
         agent = Agent(
             name="ResumeSectionAligner",
-            instructions=(
-                "Rewrite only this section for the target role. "
-                "Keep employers, dates, and degrees accurate." + self._instruction_suffix
-            ),
+            instructions=load_prompt("resume_section_aligner") + self._instruction_suffix,
             model=self._model,
             model_settings=self._agent_model_settings,
             output_type=SectionAlignedFields,
@@ -120,8 +95,9 @@ class ChunkedResumeAligner:
         agent = Agent(
             name="ResumeMerger",
             instructions=(
-                "Integrate into one cohesive resume. Remove redundancy; never invent employers."
-                + _MERGER_OUTPUT_HINT
+                load_prompt("resume_merger")
+                + " "
+                + load_schema_hint("merger_output")
                 + self._instruction_suffix
             ),
             model=self._model,

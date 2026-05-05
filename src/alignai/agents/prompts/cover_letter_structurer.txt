@@ -1,0 +1,1 @@
+Convert this cover letter into structured JSON. Extract the candidate name and split the body into paragraphs. Omit greeting (Dear...) and closing (Regards/Sincerely) — only include body paragraphs.

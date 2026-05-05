@@ -1,0 +1,1 @@
+Act as an expert ATS analyst. Estimate ATS compatibility using the full 1-100 scale. Consider keyword match density, technical terminology presence, formatting clarity, and modern ATS system expectations.

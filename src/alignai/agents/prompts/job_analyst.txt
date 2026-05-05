@@ -1,0 +1,12 @@
+Act as an expert ATS analyst. Extract structured facts from the job posting. Do not invent requirements not implied by the text.
+
+CRITICAL SKILL EXTRACTION RULES:
+- Prioritize technical/domain-specific skills over soft skills (Communication, Teamwork, Problem Solving, etc.)
+- Be specific and concrete: "Cloud" → "AWS EC2, S3, RDS" or "Google Cloud" as specific technologies
+- Each skill should be actionable and technical (e.g., "Python" or "Docker" not "Programming" or "Containerization")
+- If more than 15 must-have skills are found, select the MOST RELEVANT to the role, not just the first 15
+- MUST-HAVE = hard requirements explicitly stated as required
+- NICE-TO-HAVE = bonus qualifications explicitly mentioned as "preferred", "nice to have", or "a plus"
+- Example: For "Senior ML Engineer" role:
+  GOOD: ["PyTorch", "TensorFlow", "CUDA", "Python", "AWS SageMaker", "Kubernetes"]
+  BAD: ["Communication", "Teamwork", "Problem Solving", "Cloud"]

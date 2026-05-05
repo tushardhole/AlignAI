@@ -114,6 +114,36 @@ See `infra/text_cleanup.py` for the regex specification and its unit tests.
 
 ---
 
+## Alignment Prompts & Rules Documentation
+
+All LLM agent instructions live in `src/alignai/agents/prompts/` as separate `.txt` files.
+`docs/alignment_rules.md` is the single source of truth for how alignment works.
+
+**When modifying prompts or alignment logic:**
+
+1. **Edit prompt text**: Modify the corresponding `.txt` file in `prompts/` directory
+2. **Change chunking threshold (currently 12,000 chars)**: Update three places:
+   - `src/alignai/agents/align_ai_runner.py` line ~21: `_DEFAULT_CHUNK_THRESHOLD`
+   - `docs/alignment_rules.md`: "Single-Pass vs Chunked Decision" section
+   - Commit message should reference all three locations
+3. **Add/remove JSON fields in schema**:
+   - Corresponding schema hint file in `prompts/schema_hints/`
+   - Pydantic model in `src/alignai/agents/structured_*.py`
+   - `docs/alignment_rules.md` Agent Rules section
+4. **Modify agent behavior**: Update prompt AND update corresponding rule in `alignment_rules.md`
+
+**CRITICAL**: `docs/alignment_rules.md` must stay in sync with code.
+Update it whenever you change:
+- Any prompt instruction
+- Chunking decision logic or thresholds
+- Character truncation limits
+- Agent rules or behavior
+
+This ensures documentation stays in sync with code and all developers understand
+the alignment strategy, when chunking happens, and what each agent does.
+
+---
+
 ## Secrets
 
 - Never commit secrets. Use `keyring` for tokens (Telegram, LLM API key).

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from alignai.agents import chunked_resume_alignment as m
+from alignai.agents.prompts import load_schema_hint
 
 
 def test_resume_parser_shape_prefers_sections_and_experience_array() -> None:
-    s = m._RESUME_PARSER_JSON_OBJECT_SHAPE
+    s = load_schema_hint("resume_parser_shape")
     assert "sections" in s
     assert "Experience" in s
     assert '[{"Employer":"Acme"' in s.replace(" ", "")
@@ -14,6 +14,6 @@ def test_resume_parser_shape_prefers_sections_and_experience_array() -> None:
 
 
 def test_merger_hint_requests_single_content_string() -> None:
-    h = m._MERGER_OUTPUT_HINT
+    h = load_schema_hint("merger_output")
     assert '"content"' in h
     assert "nested JSON" in h.lower() or "nested" in h.lower()

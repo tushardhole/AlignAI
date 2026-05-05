@@ -10,55 +10,12 @@ from alignai.agents.aligned_resume_fields import AlignedResumeFields
 from alignai.agents.ats_score_fields import AtsScoreFields
 from alignai.agents.job_brief_fields import JobBriefFields
 from alignai.agents.match_score_fields import MatchScoreFields
+from alignai.agents.prompts import load_prompt, load_schema_hint
 from alignai.agents.structured_cover_letter_fields import StructuredCoverLetterFields
 from alignai.agents.structured_resume_fields import StructuredResumeFields
 from alignai.domain.models import CoverLetter, JobPosting, Resume
 
 _JOB_POSTING_BODY_MAX_CHARS = 18_000
-
-_RESUME_STRUCTURE_SCHEMA_HINT = (
-    " Output valid JSON with these keys: "
-    '"name" (string), "email" (string), "phone" (string), "location" (string), '
-    '"summary" (string), '
-    '"links" (array of {"url": string, "display": string}), '
-    '"skills_by_category" (object: {"Category Name": ["skill1", "skill2"]}), '
-    '"experience" (array of {"title": string, "company": string, "dates": string, '
-    '"bullets": [string], "meta": [{"label": string, "value": string}]}), '
-    '"education" (array of {"degree": string, "school": string, '
-    '"location": string, "graduation_date": string}), '
-    '"certifications" (array of {"name": string, "issuer": string, "date": string}), '
-    '"projects" (array of {"name": string, "link": string, "url": string, "description": string}), '
-    '"volunteer" (array of {"title": string, "company": string, '
-    '"dates": string, "bullets": [string]}), '
-    '"affiliations" (array of strings), '
-    '"awards" (array of {"title": string, "description": string}), '
-    '"publications" (array of {"title": string, "venue": string, "date": string}), '
-    '"extra_sections" (array of {"title": string, "lines": [string]}). '
-    "Omit keys for sections not present in the resume. "
-    "For meta: include Tech/Tools/Specialties/Platforms lines as meta entries."
-)
-
-_COVER_LETTER_STRUCTURE_SCHEMA_HINT = (
-    " Output valid JSON with exactly these keys: "
-    '"candidate_name" (string — the applicant name), '
-    '"paragraphs" (array of strings — body paragraphs only, '
-    "no greeting like 'Dear...' and no closing like 'Regards...')."
-)
-
-_JOB_BRIEF_SHAPE_HINT = (
-    " Respond with JSON using ONLY these four top-level keys: "
-    '"title" (string), "summary" (string), "must_have_skills" (array of strings), '
-    '"nice_to_have_skills" (array of strings). '
-    "Put each skill as a quoted string inside those two arrays only. "
-    'INVALID (will not parse): a nested "skills" object whose keys contain pseudo-code such as '
-    "`required([` or `niceToHave([` or parentheses inside key names—never emit that. "
-    'VALID example: {"title":"Engineer","summary":"...","must_have_skills":["Python","AWS"],'
-    '"nice_to_have_skills":["Beego"]}. '
-    "Do not output responsibilities, benefits, or education as separate large JSON arrays; "
-    "compress them into summary or short skill strings. "
-    "Keep must_have_skills at most 15 strings and nice_to_have_skills at most 10 "
-    "so the JSON completes."
-)
 
 
 class AlignAiAgentSteps:
@@ -78,9 +35,9 @@ class AlignAiAgentSteps:
         agent = Agent(
             name="JobAnalyst",
             instructions=(
-                "Extract structured facts from the job posting. "
-                "Do not invent requirements not implied by the text."
-                + _JOB_BRIEF_SHAPE_HINT
+                load_prompt("job_analyst")
+                + " "
+                + load_schema_hint("job_brief_shape")
                 + self._instruction_suffix
             ),
             model=self._model,
@@ -108,14 +65,7 @@ class AlignAiAgentSteps:
     ) -> str:
         agent = Agent(
             name="ResumeAligner",
-            instructions=(
-                "Rewrite the resume for this job. Keep facts truthful. "
-                "For each role: keep 4-6 strong bullets that are most relevant to the "
-                "target job. Rephrase to highlight alignment with job requirements. "
-                "Remove only truly redundant or irrelevant bullets. "
-                "Preserve Tech/Tools/Stack lines for each role. "
-                "Plain UTF-8 text only (no markdown fences)." + self._instruction_suffix
-            ),
+            instructions=load_prompt("resume_aligner") + self._instruction_suffix,
             model=self._model,
             model_settings=self._agent_model_settings,
             output_type=AlignedResumeFields,
@@ -142,10 +92,7 @@ class AlignAiAgentSteps:
     ) -> str:
         agent = Agent(
             name="CoverLetterAligner",
-            instructions=(
-                "Write a tailored cover letter in plain text. "
-                "Professional tone; no Dear Hiring Manager placeholders." + self._instruction_suffix
-            ),
+            instructions=load_prompt("cover_letter_aligner") + self._instruction_suffix,
             model=self._model,
             model_settings=self._agent_model_settings,
             output_type=AlignedCoverLetterFields,
@@ -171,9 +118,7 @@ class AlignAiAgentSteps:
     ) -> AtsScoreFields:
         agent = Agent(
             name="ATSScorer",
-            instructions=(
-                "Estimate ATS compatibility using the full 1-100 scale." + self._instruction_suffix
-            ),
+            instructions=load_prompt("ats_scorer") + self._instruction_suffix,
             model=self._model,
             model_settings=self._agent_model_settings,
             output_type=AtsScoreFields,
@@ -194,10 +139,7 @@ class AlignAiAgentSteps:
     ) -> MatchScoreFields:
         agent = Agent(
             name="MatchScorer",
-            instructions=(
-                "Score overall fit 1-5 and pick the closest MatchLabel enum value."
-                + self._instruction_suffix
-            ),
+            instructions=load_prompt("match_scorer") + self._instruction_suffix,
             model=self._model,
             model_settings=self._agent_model_settings,
             output_type=MatchScoreFields,
@@ -214,19 +156,9 @@ class AlignAiAgentSteps:
         agent = Agent(
             name="ResumeStructurer",
             instructions=(
-                "Convert this plain-text resume into structured JSON. "
-                "RULES: "
-                "1) Include all bullet points exactly as written — do not summarize, "
-                "shorten, or omit any bullets. "
-                "2) For each experience entry, if there is a line like "
-                "'Tech: Python, Go' or 'Tools: Docker, K8s' or 'Stack: ...' "
-                'put it in the meta array as {"label": "Tech", "value": "Python, Go"}. '
-                "3) Do not modify, rephrase, or drop any content. "
-                "4) Preserve the full professional summary exactly as written "
-                "(multiple sentences OK). "
-                "5) Open source contributions, side projects, and similar sections "
-                "should go into extra_sections with each contribution as a separate line."
-                + _RESUME_STRUCTURE_SCHEMA_HINT
+                load_prompt("resume_structurer")
+                + " "
+                + load_schema_hint("resume_structure")
                 + self._instruction_suffix
             ),
             model=self._model,
@@ -240,11 +172,9 @@ class AlignAiAgentSteps:
         agent = Agent(
             name="CoverLetterStructurer",
             instructions=(
-                "Convert this cover letter into structured JSON. "
-                "Extract the candidate name and split the body into paragraphs. "
-                "Omit greeting (Dear...) and closing (Regards/Sincerely) — "
-                "only include body paragraphs."
-                + _COVER_LETTER_STRUCTURE_SCHEMA_HINT
+                load_prompt("cover_letter_structurer")
+                + " "
+                + load_schema_hint("cover_letter_structure")
                 + self._instruction_suffix
             ),
             model=self._model,

@@ -1,0 +1,1 @@
+Output valid JSON with exactly these keys: "candidate_name" (string — the applicant name), "paragraphs" (array of strings — body paragraphs only, no greeting like 'Dear...' and no closing like 'Regards...').

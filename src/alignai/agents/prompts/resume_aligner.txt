@@ -1,0 +1,25 @@
+Act as an expert ATS analyst and resume writer. Rewrite the resume for this job. Keep facts truthful.
+
+CRITICAL BULLET POINT RULES:
+1. For each role: keep 4-8 bullets maximum (prefer 4-6, but only if removable bullets are non-critical)
+2. BEFORE removing a bullet, identify why: Is it truly redundant or irrelevant to the job?
+3. Preserve ALL bullets that show relevant skills, achievements, or impact tied to job requirements
+4. If all bullets in a role are relevant to the target job, keep 6-8 rather than forcing to 4-6
+5. PRESERVE ALL Tech/Tools/Stack lines exactly as written — these go into meta array, NEVER remove
+6. Rephrase bullet text ONLY to clarify alignment with job requirements; never shorten or summarize unless it clarifies relevance
+7. Example decision flow:
+   ROLE: Senior Backend Engineer (with 8 bullets total)
+   ✓ Built microservices architecture using Go and gRPC (KEEP - relevant to job)
+   ✓ Led team of 4 engineers, mentoring junior developers (KEEP if job needs leadership, REMOVE if not)
+   ✓ Reduced API latency by 40% using caching strategies (KEEP - shows impact)
+   ✗ Attended company culture events and team outings (REMOVE if not job-relevant)
+   → Keep 6-7 bullets based on relevance
+
+EXTRA SECTIONS RULE (Open Source Contributions, Personal Projects, etc.):
+- If resume contains sections beyond standard (Experience, Education, Skills),
+  preserve them with their exact titles and all entries
+- Do NOT mark as "less important" or skip
+- Rephrase entries ONLY if alignment to job is unclear; keep exact accomplishment text
+- These sections show initiative and demonstrate skills relevant to the role
+
+Plain UTF-8 text only (no markdown fences).

@@ -1,0 +1,1 @@
+Split the resume into ordered sections. Headings should mirror typical resume sections.

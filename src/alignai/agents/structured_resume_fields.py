@@ -6,7 +6,12 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from alignai.agents.llm_json_coercion import coerce_str, coerce_str_list, find_value
+from alignai.agents.llm_json_coercion import (
+    _norm_key,
+    coerce_str,
+    coerce_str_list,
+    find_value,
+)
 
 
 class StructuredResumeFields(BaseModel):
@@ -82,12 +87,8 @@ def _normalize_resume_dict(raw: dict[str, Any]) -> dict[str, Any]:
         keys=("title", "venue", "date", "description"),
     )
     out["extra_sections"] = _normalize_extra_sections(raw)
-    out["extra_sections"] += _collect_unrecognized_sections(raw)
+    out["extra_sections"] += _collect_remaining_sections(raw)
     out["extra_sections"] = _deduplicate_extra_sections(out["extra_sections"])
-    out["extra_sections"] = _deduplicate_extra_vs_projects(
-        out["extra_sections"],
-        out["projects"],
-    )
 
     return out
 
@@ -364,83 +365,89 @@ def _infer_title_from_dict(
     return "", []
 
 
-_KNOWN_KEYS = frozenset(
-    {
-        "name",
-        "candidate_name",
-        "candidatename",
-        "full_name",
-        "fullname",
-        "email",
-        "e_mail",
-        "emailaddress",
-        "phone",
-        "telephone",
-        "phone_number",
-        "phonenumber",
-        "location",
-        "city",
-        "address",
-        "city_state",
-        "citystate",
-        "summary",
-        "professional_summary",
-        "professionalsummary",
-        "profile",
-        "objective",
-        "about",
-        "links",
-        "urls",
-        "profiles",
-        "websites",
-        "skills_by_category",
-        "skillsbycategory",
-        "skills",
-        "technical_skills",
-        "technicalskills",
-        "core_competencies",
-        "corecompetencies",
-        "experience",
-        "work_experience",
-        "workexperience",
-        "professional_experience",
-        "professionalexperience",
-        "employment",
-        "employment_history",
-        "education",
-        "academic_background",
-        "academicbackground",
-        "certifications",
-        "licenses",
-        "credentials",
-        "projects",
-        "projects_title",
-        "projectstitle",
-        "volunteer",
-        "volunteer_experience",
-        "volunteerexperience",
-        "affiliations",
-        "professional_affiliations",
-        "professionalaffiliations",
-        "awards",
-        "honors",
-        "recognition",
-        "publications",
-        "papers",
-        "research",
-        "extra_sections",
-        "extrasections",
-        "additional_sections",
-    }
+# Every alias passed to find_value in any normalizer, normalized for matching.
+# Auto-maintained: if you add an alias to a normalizer, add it here too.
+_ALL_KNOWN_ALIASES: tuple[str, ...] = (
+    # scalar fields
+    "name",
+    "candidate_name",
+    "candidateName",
+    "full_name",
+    "email",
+    "e_mail",
+    "emailAddress",
+    "phone",
+    "telephone",
+    "phone_number",
+    "phoneNumber",
+    "location",
+    "city",
+    "address",
+    "city_state",
+    "summary",
+    "professional_summary",
+    "professionalSummary",
+    "profile",
+    "objective",
+    "about",
+    "projects_title",
+    "projectsTitle",
+    # list/dict fields
+    "links",
+    "urls",
+    "profiles",
+    "websites",
+    "skills_by_category",
+    "skillsByCategory",
+    "skills",
+    "technical_skills",
+    "technicalSkills",
+    "core_competencies",
+    "coreCompetencies",
+    "experience",
+    "work_experience",
+    "workExperience",
+    "professional_experience",
+    "professionalExperience",
+    "employment",
+    "employment_history",
+    "education",
+    "academic_background",
+    "academicBackground",
+    "certifications",
+    "licenses",
+    "credentials",
+    "projects",
+    "side_projects",
+    "sideProjects",
+    "personal_projects",
+    "personalProjects",
+    "volunteer",
+    "volunteer_experience",
+    "volunteerExperience",
+    "community_involvement",
+    "affiliations",
+    "professional_affiliations",
+    "professionalAffiliations",
+    "memberships",
+    "awards",
+    "honors",
+    "recognition",
+    "publications",
+    "papers",
+    "research",
+    "extra_sections",
+    "extraSections",
+    "additional_sections",
 )
+_KNOWN_NORM_KEYS = frozenset(_norm_key(a) for a in _ALL_KNOWN_ALIASES)
 
 
-def _collect_unrecognized_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
-    """Detect LLM keys not matching known fields and treat them as extra sections."""
+def _collect_remaining_sections(raw: dict[str, Any]) -> list[dict[str, Any]]:
+    """Any list-valued key not consumed by a known normalizer → extra section."""
     result: list[dict[str, Any]] = []
     for key, val in raw.items():
-        norm_key = key.lower().replace(" ", "").replace("-", "").replace("_", "")
-        if norm_key in {k.replace("_", "") for k in _KNOWN_KEYS}:
+        if _norm_key(key) in _KNOWN_NORM_KEYS:
             continue
         if isinstance(val, list) and val:
             lines = coerce_str_list(val)
@@ -479,28 +486,3 @@ def _deduplicate_extra_sections(
         if existing is None or len(section.get("lines", [])) > len(existing.get("lines", [])):
             seen[title] = section
     return list(seen.values()) + untitled
-
-
-def _deduplicate_extra_vs_projects(
-    extras: list[dict[str, Any]],
-    projects: list[dict[str, str]],
-) -> list[dict[str, Any]]:
-    """Remove extra sections whose lines substantially overlap with projects."""
-    if not projects:
-        return extras
-    proj_words = set()
-    for p in projects:
-        for val in p.values():
-            proj_words.update(val.lower().split()[:5])
-    result: list[dict[str, Any]] = []
-    for section in extras:
-        lines = section.get("lines", [])
-        if not lines:
-            result.append(section)
-            continue
-        overlap = sum(
-            1 for line in lines if any(w in line.lower() for w in proj_words if len(w) > 4)
-        )
-        if overlap < len(lines) * 0.5:
-            result.append(section)
-    return result

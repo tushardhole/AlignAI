@@ -9,7 +9,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from alignai.application.pdf_markup import format_cover_letter_pdf_html, format_resume_pdf_html
 from alignai.domain.models import (
     AlignedCoverLetter,
     AlignedResume,
@@ -20,7 +19,7 @@ from alignai.domain.models import (
     MatchScore,
     label_from_score,
 )
-from alignai.domain.ports import AgentRunner, AlignmentRepository, PdfRenderer
+from alignai.domain.ports import AgentRunner, AlignmentRepository, PdfRenderer, TemplateRenderer
 
 
 def _extract_job_id(url: str) -> str:
@@ -39,19 +38,21 @@ def _extract_job_id(url: str) -> str:
 
 
 class CreateAlignment:
-    """Orchestrates agent run, deterministic cleanup, PDF render, and SQLite save."""
+    """Orchestrates agent run, template rendering, PDF generation, and persistence."""
 
     def __init__(
         self,
         runner: AgentRunner,
         alignment_repository: AlignmentRepository,
         pdf_renderer: PdfRenderer,
+        template_renderer: TemplateRenderer,
         output_root: Path,
         sanitize_text: Callable[[str], str],
     ) -> None:
         self._runner = runner
         self._alignment_repository = alignment_repository
         self._pdf_renderer = pdf_renderer
+        self._template_renderer = template_renderer
         self._output_root = output_root
         self._sanitize_text = sanitize_text
 
@@ -65,8 +66,10 @@ class CreateAlignment:
         job_id = _extract_job_id(inputs.job_posting.url)
         resume_pdf = out_dir / f"{job_id}_resume.pdf"
         cover_pdf = out_dir / f"{job_id}_cv.pdf"
-        resume_html = format_resume_pdf_html("Aligned resume", resume_txt)
-        cover_html = format_cover_letter_pdf_html("Aligned cover letter", cover_txt)
+
+        resume_html = self._template_renderer.render_resume(raw.structured_resume)
+        cover_html = self._template_renderer.render_cover_letter(raw.structured_cover_letter)
+
         await self._pdf_renderer.render(resume_html, resume_pdf)
         await self._pdf_renderer.render(cover_html, cover_pdf)
         entity = Alignment(

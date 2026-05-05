@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from agents import Agent, Runner
+from agents import Agent, AgentOutputSchema, Runner
 from agents.model_settings import ModelSettings
 
 from alignai.agents.aligned_cover_letter_fields import AlignedCoverLetterFields
@@ -10,9 +10,40 @@ from alignai.agents.aligned_resume_fields import AlignedResumeFields
 from alignai.agents.ats_score_fields import AtsScoreFields
 from alignai.agents.job_brief_fields import JobBriefFields
 from alignai.agents.match_score_fields import MatchScoreFields
+from alignai.agents.structured_cover_letter_fields import StructuredCoverLetterFields
+from alignai.agents.structured_resume_fields import StructuredResumeFields
 from alignai.domain.models import CoverLetter, JobPosting, Resume
 
 _JOB_POSTING_BODY_MAX_CHARS = 18_000
+
+_RESUME_STRUCTURE_SCHEMA_HINT = (
+    " Output valid JSON with these keys: "
+    '"name" (string), "email" (string), "phone" (string), "location" (string), '
+    '"summary" (string), '
+    '"links" (array of {"url": string, "display": string}), '
+    '"skills_by_category" (object: {"Category Name": ["skill1", "skill2"]}), '
+    '"experience" (array of {"title": string, "company": string, "dates": string, '
+    '"bullets": [string], "meta": [{"label": string, "value": string}]}), '
+    '"education" (array of {"degree": string, "school": string, '
+    '"location": string, "graduation_date": string}), '
+    '"certifications" (array of {"name": string, "issuer": string, "date": string}), '
+    '"projects" (array of {"name": string, "link": string, "url": string, "description": string}), '
+    '"volunteer" (array of {"title": string, "company": string, '
+    '"dates": string, "bullets": [string]}), '
+    '"affiliations" (array of strings), '
+    '"awards" (array of {"title": string, "description": string}), '
+    '"publications" (array of {"title": string, "venue": string, "date": string}), '
+    '"extra_sections" (array of {"title": string, "lines": [string]}). '
+    "Omit keys for sections not present in the resume. "
+    "For meta: include Tech/Tools/Specialties/Platforms lines as meta entries."
+)
+
+_COVER_LETTER_STRUCTURE_SCHEMA_HINT = (
+    " Output valid JSON with exactly these keys: "
+    '"candidate_name" (string — the applicant name), '
+    '"paragraphs" (array of strings — body paragraphs only, '
+    "no greeting like 'Dear...' and no closing like 'Regards...')."
+)
 
 _JOB_BRIEF_SHAPE_HINT = (
     " Respond with JSON using ONLY these four top-level keys: "
@@ -79,6 +110,10 @@ class AlignAiAgentSteps:
             name="ResumeAligner",
             instructions=(
                 "Rewrite the resume for this job. Keep facts truthful. "
+                "For each role: keep 4-6 strong bullets that are most relevant to the "
+                "target job. Rephrase to highlight alignment with job requirements. "
+                "Remove only truly redundant or irrelevant bullets. "
+                "Preserve Tech/Tools/Stack lines for each role. "
                 "Plain UTF-8 text only (no markdown fences)." + self._instruction_suffix
             ),
             model=self._model,
@@ -174,3 +209,47 @@ class AlignAiAgentSteps:
         )
         result = await Runner.run(agent, prompt)
         return result.final_output_as(MatchScoreFields, raise_if_incorrect_type=True)
+
+    async def structure_resume(self, resume_text: str) -> StructuredResumeFields:
+        agent = Agent(
+            name="ResumeStructurer",
+            instructions=(
+                "Convert this plain-text resume into structured JSON. "
+                "RULES: "
+                "1) Include all bullet points exactly as written — do not summarize, "
+                "shorten, or omit any bullets. "
+                "2) For each experience entry, if there is a line like "
+                "'Tech: Python, Go' or 'Tools: Docker, K8s' or 'Stack: ...' "
+                'put it in the meta array as {"label": "Tech", "value": "Python, Go"}. '
+                "3) Do not modify, rephrase, or drop any content. "
+                "4) Preserve the full professional summary exactly as written "
+                "(multiple sentences OK). "
+                "5) Open source contributions, side projects, and similar sections "
+                "should go into extra_sections with each contribution as a separate line."
+                + _RESUME_STRUCTURE_SCHEMA_HINT
+                + self._instruction_suffix
+            ),
+            model=self._model,
+            model_settings=self._agent_model_settings,
+            output_type=AgentOutputSchema(StructuredResumeFields, strict_json_schema=False),
+        )
+        result = await Runner.run(agent, f"Resume text:\n\n{resume_text}")
+        return result.final_output_as(StructuredResumeFields, raise_if_incorrect_type=True)
+
+    async def structure_cover_letter(self, cover_text: str) -> StructuredCoverLetterFields:
+        agent = Agent(
+            name="CoverLetterStructurer",
+            instructions=(
+                "Convert this cover letter into structured JSON. "
+                "Extract the candidate name and split the body into paragraphs. "
+                "Omit greeting (Dear...) and closing (Regards/Sincerely) — "
+                "only include body paragraphs."
+                + _COVER_LETTER_STRUCTURE_SCHEMA_HINT
+                + self._instruction_suffix
+            ),
+            model=self._model,
+            model_settings=self._agent_model_settings,
+            output_type=AgentOutputSchema(StructuredCoverLetterFields, strict_json_schema=False),
+        )
+        result = await Runner.run(agent, f"Cover letter:\n\n{cover_text}")
+        return result.final_output_as(StructuredCoverLetterFields, raise_if_incorrect_type=True)

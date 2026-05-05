@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import trafilatura
+from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import async_playwright
 
 from alignai.domain.models import JobPosting, UnreadableJob
 
 _MIN_EXTRACTED_LEN = 120
+
+_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+)
 
 
 class PlaywrightJobFetcher:
@@ -21,14 +27,13 @@ class PlaywrightJobFetcher:
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=True)
                 try:
-                    page = await browser.new_page()
-                    await page.goto(url, wait_until="networkidle", timeout=60_000)
+                    page = await browser.new_page(user_agent=_USER_AGENT)
+                    await page.goto(url, wait_until="domcontentloaded", timeout=30_000)
+                    await page.wait_for_timeout(3000)
                     html = await page.content()
                 finally:
                     await browser.close()
-        except TimeoutError as exc:
-            return UnreadableJob(url=url, reason=f"playwright:timeout:{exc}")
-        except (OSError, RuntimeError) as exc:
+        except (PlaywrightError, TimeoutError, OSError, RuntimeError) as exc:
             return UnreadableJob(url=url, reason=f"playwright:{exc}")
 
         downloaded = trafilatura.extract(

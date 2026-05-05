@@ -16,6 +16,7 @@ from alignai.domain.models import (
     Resume,
 )
 from alignai.infra.sqlite_alignment_repository import SqliteAlignmentRepository
+from alignai.infra.template_renderer import TemplateRenderer
 from alignai.infra.text_cleanup import clean
 
 
@@ -28,6 +29,7 @@ async def test_create_alignment_persists_row_and_pdfs_execute(tmp_path: Path) ->
         runner,
         repo,
         renderer,
+        TemplateRenderer(),
         tmp_path,
         sanitize_text=clean,
     )

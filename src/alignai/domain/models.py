@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import TYPE_CHECKING, NewType
+from typing import TYPE_CHECKING, Any, NewType
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -167,6 +167,8 @@ class AlignmentResult(BaseModel):
     ats_score: int
     match_score: int
     match_label: MatchLabel
+    structured_resume: dict[str, Any] = Field(default_factory=dict)
+    structured_cover_letter: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("ats_score")
     @classmethod

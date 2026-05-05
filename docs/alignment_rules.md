@@ -130,6 +130,30 @@ else:
 
 **Truncation Strategy**: If content exceeds limit, take first N chars + append marker.
 
+### ⚠️ Token Budget Trade-off: ATS/Match Scoring on Truncated Resume
+
+**Current Design**: ATS and Match scorers receive only first 12,000 chars of resume (if longer).
+
+**Why?** LLM token budget constraint:
+- Resume (12K) + Cover letter (8K) + Job (8K) = ~28K tokens
+- Prevents context overflow while keeping scores fast (~2-3 seconds per agent)
+- Groq's context limit doesn't allow full resume + cover + job for longer documents
+
+**Impact on Scoring Accuracy**:
+- Resumes > 12K chars lose information: later experience, skills, awards, publications, extra sections
+- ATS/Match scores reflect only beginning of resume, not complete picture
+- **Result**: Potentially **underestimated fit scores** for longer resumes
+
+**Mitigation**:
+- Resume alignment (single-pass or chunked) produces plain text with only relevant content
+- Aligned resume is typically < 12K chars even if original was longer
+- So in practice: aligned resume usually fits within 12K, scores are reasonably accurate
+
+**Future Improvement**:
+- Implement smart truncation: take first 10K + last 2K chars (preserve ending sections)
+- Or: conditionally truncate only if actual length exceeds limit
+- Or: use hierarchical scoring (quick pass on truncated, detailed on full if needed)
+
 ## Prompt Management
 
 All LLM agent instructions live in `src/alignai/agents/prompts/` as separate `.txt` files:

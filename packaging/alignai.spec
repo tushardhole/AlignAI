@@ -4,24 +4,22 @@ import os
 import sys
 
 # Use relative paths since build.py always runs from repo root
-# This spec file is at packaging/alignai.spec, one level down
 src_path = 'src'
 main_py = os.path.join(src_path, 'alignai', 'main.py')
 
-# Find agents package data (handles different Python versions)
-venv_lib = os.path.join('.venv', 'lib')
-agents_src = None
-if os.path.exists(venv_lib):
-    for python_dir in os.listdir(venv_lib):
-        agents_path = os.path.join(venv_lib, python_dir, 'site-packages', 'agents')
-        if os.path.exists(agents_path):
-            agents_src = agents_path
-            break
-
-# Build datas list conditionally
+# Try to find agents package data (optional - will work without it for now)
 datas_list = []
-if agents_src:
-    datas_list.append((agents_src, 'agents'))
+try:
+    venv_lib = os.path.join('.venv', 'lib')
+    if os.path.exists(venv_lib):
+        for python_dir in sorted(os.listdir(venv_lib)):
+            agents_path = os.path.join(venv_lib, python_dir, 'site-packages', 'agents')
+            if os.path.exists(agents_path):
+                datas_list.append((agents_path, 'agents'))
+                break
+except Exception:
+    # If we can't find agents data, continue without it
+    pass
 
 a = Analysis(
     [main_py],

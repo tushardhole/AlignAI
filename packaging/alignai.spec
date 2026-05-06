@@ -3,13 +3,13 @@
 import os
 import sys
 
-# Get absolute path to the repo root
-# Use SPECPATH (provided by PyInstaller) instead of __file__
-repo_root = os.path.dirname(os.path.dirname(os.path.abspath(SPECPATH)))
-src_path = os.path.join(repo_root, 'src')
+# Use relative paths since build.py always runs from repo root
+# This spec file is at packaging/alignai.spec, one level down
+src_path = 'src'
+main_py = os.path.join(src_path, 'alignai', 'main.py')
 
 # Find agents package data (handles different Python versions)
-venv_lib = os.path.join(repo_root, '.venv', 'lib')
+venv_lib = os.path.join('.venv', 'lib')
 agents_src = None
 if os.path.exists(venv_lib):
     for python_dir in os.listdir(venv_lib):
@@ -24,7 +24,7 @@ if agents_src:
     datas_list.append((agents_src, 'agents'))
 
 a = Analysis(
-    [os.path.join(src_path, 'alignai', 'main.py')],
+    [main_py],
     pathex=[src_path],
     binaries=[],
     datas=datas_list,

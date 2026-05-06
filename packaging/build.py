@@ -52,28 +52,38 @@ def _build_dmg(app_bundle: Path) -> None:
     output_dir.mkdir(exist_ok=True)
 
     # Get version from Git tag or use 0.1.0
+    version = "0.1.0"
     try:
-        version = subprocess.run(
+        result = subprocess.run(
             ["git", "describe", "--tags", "--abbrev=0"],
             cwd=here.parent,
             capture_output=True,
             text=True,
             check=False,
-        ).stdout.strip()
-        if version.startswith("v"):
-            version = version[1:]
+        )
+        git_version = result.stdout.strip()
+        if git_version:
+            if git_version.startswith("v"):
+                git_version = git_version[1:]
+            version = git_version
     except Exception:
-        version = "0.1.0"
+        pass
 
     # Determine architecture
     import platform
 
     arch = "arm64" if platform.processor() == "arm" else "x86_64"
 
-    dmg_path = output_dir / f"AlignAI-{version}-{arch}.dmg"
+    print(f"🔍 DEBUG: Version: {version}")
+    print(f"🔍 DEBUG: Architecture: {arch}")
+    print(f"🔍 DEBUG: App bundle: {app_bundle}")
+    print(f"🔍 DEBUG: App bundle exists: {app_bundle.exists()}")
 
-    # Create DMG using hdiutil
-    subprocess.run(
+    dmg_path = output_dir / f"AlignAI-{version}-{arch}.dmg"
+    print(f"🔍 DEBUG: DMG path: {dmg_path}")
+
+    # Create DMG using hdiutil with stderr capture for better error messages
+    result = subprocess.run(
         [
             "hdiutil",
             "create",
@@ -86,9 +96,18 @@ def _build_dmg(app_bundle: Path) -> None:
             "UDZO",
             str(dmg_path),
         ],
-        check=True,
+        capture_output=True,
+        text=True,
     )
+    if result.returncode != 0:
+        print(f"❌ hdiutil failed with exit code {result.returncode}")
+        print(f"STDOUT: {result.stdout}")
+        print(f"STDERR: {result.stderr}")
+        raise subprocess.CalledProcessError(
+            result.returncode, "hdiutil", result.stdout, result.stderr
+        )
     print(f"✅ Created DMG: {dmg_path}")
+    print(f"hdiutil output: {result.stdout}")
 
 
 def _build_nsis() -> None:

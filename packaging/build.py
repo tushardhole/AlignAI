@@ -108,7 +108,8 @@ def _build_nsis() -> None:
     except Exception:
         version = "0.1.0"
 
-    arch = "arm64" if platform.processor() == "ARM64" else "x64"
+    processor = platform.processor().upper()
+    arch = "arm64" if processor in ("ARM64", "ARM") else "x64"
 
     # DEBUG: Show platform and architecture info
     print(f"🔍 DEBUG: Platform processor: {platform.processor()}")
@@ -154,9 +155,11 @@ def _build_nsis() -> None:
                     if file_path.is_file():
                         # Create archive name relative to dist_dir parent
                         # (includes 'alignai' folder)
-                        arcname = Path("alignai") / file_path.relative_to(dist_dir)
+                        # Use forward slashes for ZIP paths (ZIP standard)
+                        rel_path = file_path.relative_to(dist_dir)
+                        arcname = f"alignai/{rel_path.as_posix()}"
                         try:
-                            zf.write(str(file_path), str(arcname))
+                            zf.write(str(file_path), arcname)
                             file_count += 1
                         except Exception as e:
                             print(f"🔍 DEBUG: Error adding file {file_path}: {e}")

@@ -225,6 +225,19 @@ def _build_appimage() -> None:
 
 
 def main() -> None:
+    import os
+    import sys as sys_module
+
+    # Emergency debug output to stderr to ensure visibility
+    print("🔍 DEBUG: main() called", file=sys_module.stderr, flush=True)
+    print(f"🔍 DEBUG: sys.argv: {sys_module.argv}", file=sys_module.stderr, flush=True)
+    print(f"🔍 DEBUG: cwd: {os.getcwd()}", file=sys_module.stderr, flush=True)
+    print(
+        f"🔍 DEBUG: PYTHONPATH: {os.environ.get('PYTHONPATH', 'not set')}",
+        file=sys_module.stderr,
+        flush=True,
+    )
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--target",
@@ -234,11 +247,12 @@ def main() -> None:
         "nsis (Windows), appimage (Linux)",
     )
     args = parser.parse_args()
+    print(f"🔍 DEBUG: parsed target: {args.target}", file=sys_module.stderr, flush=True)
 
     # Always build PyInstaller app bundle first
-    print("🔨 Building PyInstaller app bundle...")
+    print("🔨 Building PyInstaller app bundle...", flush=True)
     app_bundle = _build_pyinstaller()
-    print(f"✅ App bundle created: {app_bundle}")
+    print(f"✅ App bundle created: {app_bundle}", flush=True)
 
     # Then create platform-specific installer
     if args.target == "pyinstaller":

@@ -269,4 +269,30 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import logging
+    import traceback
+
+    # Set up logging to a file AND stdout
+    # Write to dist-installers so it's uploaded as artifact
+    dist_installers = Path(__file__).parent.parent / "dist-installers"
+    dist_installers.mkdir(exist_ok=True)
+    log_path = dist_installers / "build.log"
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.FileHandler(log_path),
+            logging.StreamHandler(),
+        ],
+    )
+
+    try:
+        main()
+    except Exception as e:
+        logging.error(f"Build failed with exception: {e}")
+        traceback.print_exc()
+        # Also write traceback to file
+        with open(log_path, "a") as f:
+            f.write("\n=== TRACEBACK ===\n")
+            f.write(traceback.format_exc())
+        sys.exit(1)

@@ -92,12 +92,14 @@ def _build_dmg(app_bundle: Path) -> None:
 
 
 def _build_nsis() -> None:
-    """Create NSIS installer (Windows only)."""
+    """Create Windows installer (NSIS placeholder using ZIP)."""
     import platform
 
     here = Path(__file__).resolve().parent
     output_dir = here.parent / "dist-installers"
     output_dir.mkdir(exist_ok=True)
+
+    print("🔍 DEBUG: _build_nsis() called")
 
     # Get version
     try:
@@ -116,92 +118,52 @@ def _build_nsis() -> None:
     processor = platform.processor().upper()
     arch = "arm64" if processor in ("ARM64", "ARM") else "x64"
 
-    # DEBUG: Show platform and architecture info
-    print(f"🔍 DEBUG: Platform processor: {platform.processor()}")
+    print(f"🔍 DEBUG: Platform processor: {processor}")
     print(f"🔍 DEBUG: Detected architecture: {arch}")
     print(f"🔍 DEBUG: Version: {version}")
-    print(f"🔍 DEBUG: Script location: {here}")
-    print(f"🔍 DEBUG: Output directory: {output_dir}")
 
-    # For now, create a simple ZIP as placeholder
-    # In production, would use NSIS builder
+    # Locate PyInstaller output directory
     dist_dir = here / "dist" / "alignai"
+    print(f"🔍 DEBUG: Looking for dist directory: {dist_dir}")
 
-    # DEBUG: Check dist directory
-    print(f"🔍 DEBUG: Checking dist directory: {dist_dir}")
-    print(f"🔍 DEBUG: dist_dir exists: {dist_dir.exists()}")
-
-    # If alignai directory not found, check what PyInstaller actually created
+    # Try to find alignai directory (may have different name on some platforms)
     if not dist_dir.exists():
-        print("⚠️  alignai directory not found, checking dist/ contents:")
         dist_parent = here / "dist"
         if dist_parent.exists():
-            print(f"🔍 DEBUG: Contents of {dist_parent}:")
+            # Look for any directory that might be our output
             for item in dist_parent.iterdir():
-                print(f"  - {item.name} (directory: {item.is_dir()})")
-                if item.is_dir() and item.name.startswith("alignai"):
-                    print(f"    Found potential dist_dir: {item}")
-                    dist_dir = item
-                    break
+                if item.is_dir():
+                    print(f"🔍 DEBUG: Found directory in dist/: {item.name}")
+                    if "alignai" in item.name.lower():
+                        dist_dir = item
+                        break
 
-    if dist_dir.exists():
-        # DEBUG: List directory contents
-        print(f"🔍 DEBUG: Contents of {dist_dir}:")
-        try:
-            all_items = list(dist_dir.rglob("*"))
-            print(f"🔍 DEBUG: Total items found: {len(all_items)}")
-            file_items = [f for f in all_items if f.is_file()]
-            print(f"🔍 DEBUG: Total files found: {len(file_items)}")
-            if len(file_items) <= 20:
-                for item in sorted(file_items):
-                    print(f"  - {item.relative_to(dist_dir)}")
-            else:
-                for item in sorted(file_items)[:20]:
-                    print(f"  - {item.relative_to(dist_dir)}")
-                print(f"  ... and {len(file_items) - 20} more files")
-        except Exception as e:
-            print(f"🔍 DEBUG: Error listing directory: {e}")
+    if not dist_dir.exists():
+        msg = f"PyInstaller output not found at {dist_dir}"
+        print(f"❌ ERROR: {msg}")
+        raise FileNotFoundError(msg)
 
-        zip_path = output_dir / f"AlignAI-{version}-{arch}.zip"
-        print(f"🔍 DEBUG: Creating ZIP at: {zip_path}")
+    # Create ZIP file from PyInstaller output
+    zip_path = output_dir / f"AlignAI-{version}-{arch}.zip"
+    print(f"🔍 DEBUG: Creating ZIP at: {zip_path}")
 
-        try:
-            # Create ZIP manually with zipfile for cross-platform compatibility
+    try:
+        with zipfile.ZipFile(str(zip_path), "w", zipfile.ZIP_DEFLATED) as zf:
             file_count = 0
-            with zipfile.ZipFile(str(zip_path), "w", zipfile.ZIP_DEFLATED) as zf:
-                for file_path in dist_dir.rglob("*"):
-                    if file_path.is_file():
-                        # Create archive name relative to dist_dir parent
-                        # (includes 'alignai' folder)
-                        # Use forward slashes for ZIP paths (ZIP standard)
-                        rel_path = file_path.relative_to(dist_dir)
-                        arcname = f"alignai/{rel_path.as_posix()}"
-                        try:
-                            zf.write(str(file_path), arcname)
-                            file_count += 1
-                        except Exception as e:
-                            print(f"🔍 DEBUG: Error adding file {file_path}: {e}")
-            print(f"✅ Created ZIP (NSIS placeholder): {zip_path}")
-            print(f"🔍 DEBUG: Added {file_count} files to ZIP")
-        except Exception as e:
-            print(f"❌ ERROR creating ZIP: {e}")
-            import traceback
+            for file_path in sorted(dist_dir.rglob("*")):
+                if file_path.is_file():
+                    rel_path = file_path.relative_to(dist_dir)
+                    # Use forward slashes for ZIP archives
+                    arcname = f"alignai/{rel_path.as_posix()}"
+                    zf.write(str(file_path), arcname)
+                    file_count += 1
+        print(f"✅ Created ZIP: {zip_path} ({file_count} files)")
+    except Exception as e:
+        print(f"❌ ERROR creating ZIP: {e}")
+        import traceback
 
-            traceback.print_exc()
-            raise
-    else:
-        print("⚠️  NSIS: PyInstaller output not found at expected location")
-        print(f"🔍 DEBUG: Expected directory: {dist_dir}")
-        # Check if parent directory exists
-        parent = dist_dir.parent
-        print(f"🔍 DEBUG: Parent directory exists: {parent.exists()}")
-        if parent.exists():
-            print(f"🔍 DEBUG: Contents of {parent}:")
-            try:
-                for item in parent.iterdir():
-                    print(f"  - {item.name}")
-            except Exception as e:
-                print(f"🔍 DEBUG: Error listing parent: {e}")
+        traceback.print_exc()
+        raise
 
 
 def _build_appimage() -> None:

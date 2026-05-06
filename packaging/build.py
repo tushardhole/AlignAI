@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import argparse
-import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 
@@ -114,10 +114,15 @@ def _build_nsis() -> None:
     # In production, would use NSIS builder
     dist_dir = here / "dist" / "alignai"
     if dist_dir.exists():
-        zip_path = output_dir / f"AlignAI-{version}-{arch}"
-        # Use shutil.make_archive which is cross-platform
-        shutil.make_archive(str(zip_path), "zip", str(dist_dir.parent), "alignai")
-        print(f"✅ Created ZIP (NSIS placeholder): {zip_path}.zip")
+        zip_path = output_dir / f"AlignAI-{version}-{arch}.zip"
+        # Create ZIP manually with zipfile for cross-platform compatibility
+        with zipfile.ZipFile(str(zip_path), "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path in dist_dir.rglob("*"):
+                if file_path.is_file():
+                    # Create archive name relative to dist_dir parent (includes 'alignai' folder)
+                    arcname = Path("alignai") / file_path.relative_to(dist_dir)
+                    zf.write(str(file_path), str(arcname))
+        print(f"✅ Created ZIP (NSIS placeholder): {zip_path}")
     else:
         print("⚠️  NSIS: PyInstaller output not found at expected location")
 

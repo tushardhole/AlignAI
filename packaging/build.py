@@ -26,6 +26,11 @@ def _build_pyinstaller() -> Path:
     repo = here.parent
     spec = here / "alignai.spec"
 
+    # PyInstaller spec file uses relative paths, so run from repo root
+    print(f"🔍 DEBUG: Running PyInstaller from: {repo}", flush=True)
+    print(f"🔍 DEBUG: Spec file: {spec}", flush=True)
+    print(f"🔍 DEBUG: src path exists: {(repo / 'src').exists()}", flush=True)
+
     subprocess.run(
         [
             sys.executable,

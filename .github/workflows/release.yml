@@ -36,12 +36,13 @@ jobs:
           - os: macos-13
             arch: x86_64
             target: dmg
-          - os: windows-latest
-            arch: x64
-            target: nsis
           - os: ubuntu-22.04
             arch: x86_64
             target: appimage
+          # Windows builds are on hold until local Windows machine available for testing
+          # - os: windows-latest
+          #   arch: x64
+          #   target: nsis
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:

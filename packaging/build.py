@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -113,12 +114,10 @@ def _build_nsis() -> None:
     # In production, would use NSIS builder
     dist_dir = here / "dist" / "alignai"
     if dist_dir.exists():
-        zip_path = output_dir / f"AlignAI-{version}-{arch}.zip"
-        subprocess.run(
-            ["python", "-m", "zipfile", "-c", str(zip_path), str(dist_dir)],
-            check=True,
-        )
-        print(f"✅ Created ZIP (NSIS placeholder): {zip_path}")
+        zip_path = output_dir / f"AlignAI-{version}-{arch}"
+        # Use shutil.make_archive which is cross-platform
+        shutil.make_archive(str(zip_path), "zip", str(dist_dir.parent), "alignai")
+        print(f"✅ Created ZIP (NSIS placeholder): {zip_path}.zip")
     else:
         print("⚠️  NSIS: PyInstaller output not found at expected location")
 

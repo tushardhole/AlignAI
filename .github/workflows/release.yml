@@ -33,12 +33,14 @@ jobs:
           - os: macos-14
             arch: arm64
             target: dmg
-          - os: macos-13
-            arch: x86_64
-            target: dmg
           - os: ubuntu-22.04
             arch: x86_64
             target: appimage
+          # macOS 13 (Intel) on hold - GitHub Actions runners often unavailable
+          # (deprecated by Apple). Apple Silicon (macos-14) covers most users.
+          # - os: macos-13
+          #   arch: x86_64
+          #   target: dmg
           # Windows builds are on hold until local Windows machine available for testing
           # - os: windows-latest
           #   arch: x64

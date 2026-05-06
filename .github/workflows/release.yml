@@ -108,17 +108,17 @@ jobs:
           name: dist-${{ matrix.os }}-${{ matrix.arch }}
           path: dist-installers/
       - name: Codesign and notarize
-        if: >-
-          secrets.APPLE_DEVELOPER_ID != '' &&
-          secrets.APPLE_ID != '' &&
-          secrets.APPLE_TEAM_ID != '' &&
-          secrets.APPLE_APP_PASSWORD != ''
         env:
           APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-        run: python packaging/signer.py --artifacts dist-installers/
+        run: |
+          if [ -n "$APPLE_DEVELOPER_ID" ] && [ -n "$APPLE_ID" ] && [ -n "$APPLE_TEAM_ID" ] && [ -n "$APPLE_APP_PASSWORD" ]; then
+            python packaging/signer.py --artifacts dist-installers/
+          else
+            echo "⚠️  Apple signing secrets not configured, skipping codesign/notarize"
+          fi
       - name: Re-upload signed artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

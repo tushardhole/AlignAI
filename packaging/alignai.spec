@@ -4,8 +4,8 @@ import os
 import sys
 
 a = Analysis(
-    ['src/alignai/main.py'],
-    pathex=['src'],
+    ['../src/alignai/main.py'],
+    pathex=['../src'],
     binaries=[],
     datas=[],
     hiddenimports=[

@@ -9,6 +9,11 @@ import sys
 import zipfile
 from pathlib import Path
 
+# Emergency early-stage error detection
+print("🔍 Starting build.py", file=sys.stderr, flush=True)
+print(f"🔍 Python version: {sys.version}", file=sys.stderr, flush=True)
+print(f"🔍 Platform: {sys.platform}", file=sys.stderr, flush=True)
+
 
 def _build_pyinstaller() -> Path:
     """Build app bundle using PyInstaller."""

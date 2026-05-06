@@ -8,11 +8,17 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 agents_datas = collect_data_files('agents', include_py_files=False)
 agents_submodules = collect_submodules('agents')
 
+# Bundle alignai package data files (templates, prompts)
+alignai_datas = [
+    ('../src/alignai/infra/templates', 'alignai/infra/templates'),
+    ('../src/alignai/agents/prompts', 'alignai/agents/prompts'),
+]
+
 a = Analysis(
     ['../src/alignai/main.py'],
     pathex=['../src'],
     binaries=[],
-    datas=agents_datas,
+    datas=agents_datas + alignai_datas,
     hiddenimports=[
         'openai',
         'PySide6',

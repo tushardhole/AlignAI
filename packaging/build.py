@@ -38,11 +38,27 @@ def _build_pyinstaller() -> Path:
             "PyInstaller",
             str(spec),
             "--noconfirm",
+            "--clean",
+            "--workpath",
+            str(here / "build"),
+            "--distpath",
+            str(here / "dist"),
         ],
         cwd=repo,
         check=True,
     )
-    return here / "dist" / "alignai.app"
+
+    app_bundle = here / "dist" / "alignai.app"
+    print(f"🔍 DEBUG: After PyInstaller, app_bundle path: {app_bundle}", flush=True)
+    print(f"🔍 DEBUG: app_bundle exists: {app_bundle.exists()}", flush=True)
+    if not app_bundle.exists():
+        # Show what's actually in dist/ for debugging
+        dist_dir = here / "dist"
+        if dist_dir.exists():
+            print(f"🔍 DEBUG: Contents of {dist_dir}:", flush=True)
+            for item in dist_dir.iterdir():
+                print(f"  - {item.name}", flush=True)
+    return app_bundle
 
 
 def _build_dmg(app_bundle: Path) -> None:

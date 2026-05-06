@@ -3,29 +3,11 @@
 import os
 import sys
 
-# Use relative paths since build.py always runs from repo root
-src_path = 'src'
-main_py = os.path.join(src_path, 'alignai', 'main.py')
-
-# Try to find agents package data (optional - will work without it for now)
-datas_list = []
-try:
-    venv_lib = os.path.join('.venv', 'lib')
-    if os.path.exists(venv_lib):
-        for python_dir in sorted(os.listdir(venv_lib)):
-            agents_path = os.path.join(venv_lib, python_dir, 'site-packages', 'agents')
-            if os.path.exists(agents_path):
-                datas_list.append((agents_path, 'agents'))
-                break
-except Exception:
-    # If we can't find agents data, continue without it
-    pass
-
 a = Analysis(
-    [main_py],
-    pathex=[src_path],
+    ['src/alignai/main.py'],
+    pathex=['src'],
     binaries=[],
-    datas=datas_list,
+    datas=[],
     hiddenimports=[
         'agents',
         'openai',
@@ -70,9 +52,6 @@ coll = COLLECT(
     upx_exclude=[],
     name='alignai',
 )
-
-# macOS app bundle (ignored on Windows/Linux)
-import sys
 
 if sys.platform == 'darwin':
     app = BUNDLE(

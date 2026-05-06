@@ -56,6 +56,10 @@ dev = [
 
 packaging = [
     "pyinstaller>=6.20.0",
+    # Platform-specific installers are built using native tools:
+    # macOS: hdiutil (built-in), codesign (built-in)
+    # Windows: NSIS (installed on runner), or ZIP (Python built-in)
+    # Linux: appimagetool (installed on runner), or TAR (Python built-in)
 ]
 
 [project.scripts]

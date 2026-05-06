@@ -66,6 +66,8 @@ jobs:
         run: playwright install chromium --with-deps
       - name: Build distributable
         run: python packaging/build.py --target ${{ matrix.target }}
+      - name: List output
+        run: ls -lah dist-installers/ 2>/dev/null || echo "No dist-installers directory"
       - name: Generate SHA256 checksum
         shell: bash
         run: |
@@ -114,7 +116,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-        run: python packaging/sign_macos.py --artifacts dist-installers/
+        run: python packaging/signer.py --artifacts dist-installers/
       - name: Re-upload signed artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

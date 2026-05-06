@@ -25,7 +25,7 @@ jobs:
     name: Build (${{ matrix.os }} / ${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    continue-on-error: ${{ matrix.experimental || false }}
+    continue-on-error: false
     strategy:
       fail-fast: false
       matrix:
@@ -39,15 +39,8 @@ jobs:
           - os: windows-latest
             arch: x64
             target: nsis
-          - os: windows-11-arm
-            arch: arm64
-            target: nsis
-            experimental: true  # arm64 wheels may lag; non-blocking
           - os: ubuntu-22.04
             arch: x86_64
-            target: appimage
-          - os: ubuntu-22.04-arm
-            arch: arm64
             target: appimage
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -90,7 +83,7 @@ jobs:
     needs: build
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    if: startsWith(github.ref, 'refs/tags/') && (matrix.os == 'macos-14' || matrix.os == 'macos-13')
+    if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: read
     strategy:

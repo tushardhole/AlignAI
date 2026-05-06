@@ -20,7 +20,7 @@ jobs:
     name: Build (${{ matrix.os }} / ${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    continue-on-error: ${{ matrix.experimental || false }}
+    continue-on-error: false
     strategy:
       fail-fast: false
       matrix:

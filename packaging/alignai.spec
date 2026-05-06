@@ -2,21 +2,25 @@
 
 import os
 import sys
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+
+# Collect all data files and submodules from packages with non-Python data
+agents_datas = collect_data_files('agents', include_py_files=False)
+agents_submodules = collect_submodules('agents')
 
 a = Analysis(
     ['../src/alignai/main.py'],
     pathex=['../src'],
     binaries=[],
-    datas=[],
+    datas=agents_datas,
     hiddenimports=[
-        'agents',
         'openai',
         'PySide6',
         'platformdirs',
         'keyring',
         'pypdf',
         'playwright',
-    ],
+    ] + agents_submodules,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

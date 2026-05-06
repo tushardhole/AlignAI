@@ -4,9 +4,13 @@ import os
 import sys
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
-# Collect all data files and submodules from packages with non-Python data
+# Collect data files and submodules for packages with non-Python data
+# (PyInstaller only bundles .py files automatically)
 agents_datas = collect_data_files('agents', include_py_files=False)
 agents_submodules = collect_submodules('agents')
+
+# trafilatura ships a settings.cfg used by its config parser
+trafilatura_datas = collect_data_files('trafilatura', include_py_files=False)
 
 # Bundle alignai package data files (templates, prompts)
 alignai_datas = [
@@ -18,7 +22,7 @@ a = Analysis(
     ['../src/alignai/main.py'],
     pathex=['../src'],
     binaries=[],
-    datas=agents_datas + alignai_datas,
+    datas=agents_datas + trafilatura_datas + alignai_datas,
     hiddenimports=[
         'openai',
         'PySide6',
@@ -26,6 +30,7 @@ a = Analysis(
         'keyring',
         'pypdf',
         'playwright',
+        'trafilatura',
     ] + agents_submodules,
     hookspath=[],
     hooksconfig={},

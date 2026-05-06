@@ -4,7 +4,8 @@ import os
 import sys
 
 # Get absolute path to the repo root
-repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Use SPECPATH (provided by PyInstaller) instead of __file__
+repo_root = os.path.dirname(os.path.dirname(os.path.abspath(SPECPATH)))
 src_path = os.path.join(repo_root, 'src')
 
 # Find agents package data (handles different Python versions)

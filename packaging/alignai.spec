@@ -12,6 +12,12 @@ agents_submodules = collect_submodules('agents')
 # trafilatura ships a settings.cfg used by its config parser
 trafilatura_datas = collect_data_files('trafilatura', include_py_files=False)
 
+# justext (used by trafilatura) ships language stoplist .txt files
+justext_datas = collect_data_files('justext', include_py_files=False)
+
+# certifi ships cacert.pem for HTTPS certificate validation
+certifi_datas = collect_data_files('certifi', include_py_files=False)
+
 # Bundle alignai package data files (templates, prompts)
 alignai_datas = [
     ('../src/alignai/infra/templates', 'alignai/infra/templates'),
@@ -22,15 +28,30 @@ a = Analysis(
     ['../src/alignai/main.py'],
     pathex=['../src'],
     binaries=[],
-    datas=agents_datas + trafilatura_datas + alignai_datas,
+    datas=(
+        agents_datas
+        + trafilatura_datas
+        + justext_datas
+        + certifi_datas
+        + alignai_datas
+    ),
     hiddenimports=[
         'openai',
         'PySide6',
         'platformdirs',
         'keyring',
+        'keyring.backends.macOS',
+        'keyring.backends.Windows',
+        'keyring.backends.SecretService',
+        'keyring.backends.kwallet',
         'pypdf',
+        'docx',
+        'jinja2',
         'playwright',
         'trafilatura',
+        'justext',
+        'certifi',
+        'httpx',
     ] + agents_submodules,
     hookspath=[],
     hooksconfig={},

@@ -1,12 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+import sys
+
+# Get absolute path to the repo root
+repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src_path = os.path.join(repo_root, 'src')
 
 a = Analysis(
-    ['../src/alignai/main.py'],
-    pathex=['src'],
+    [os.path.join(src_path, 'alignai', 'main.py')],
+    pathex=[src_path],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=[
+        'agents',
+        'openai',
+        'PySide6',
+        'platformdirs',
+        'keyring',
+        'pypdf',
+        'playwright',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

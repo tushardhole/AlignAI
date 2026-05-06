@@ -126,6 +126,19 @@ def _build_nsis() -> None:
     print(f"🔍 DEBUG: Checking dist directory: {dist_dir}")
     print(f"🔍 DEBUG: dist_dir exists: {dist_dir.exists()}")
 
+    # If alignai directory not found, check what PyInstaller actually created
+    if not dist_dir.exists():
+        print("⚠️  alignai directory not found, checking dist/ contents:")
+        dist_parent = here / "dist"
+        if dist_parent.exists():
+            print(f"🔍 DEBUG: Contents of {dist_parent}:")
+            for item in dist_parent.iterdir():
+                print(f"  - {item.name} (directory: {item.is_dir()})")
+                if item.is_dir() and item.name.startswith("alignai"):
+                    print(f"    Found potential dist_dir: {item}")
+                    dist_dir = item
+                    break
+
     if dist_dir.exists():
         # DEBUG: List directory contents
         print(f"🔍 DEBUG: Contents of {dist_dir}:")

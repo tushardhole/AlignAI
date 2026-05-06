@@ -42,9 +42,14 @@ coll = COLLECT(
     upx_exclude=[],
     name='alignai',
 )
-app = BUNDLE(
-    coll,
-    name='alignai.app',
-    icon=None,
-    bundle_identifier=None,
-)
+
+# macOS app bundle (ignored on Windows/Linux)
+import sys
+
+if sys.platform == 'darwin':
+    app = BUNDLE(
+        coll,
+        name='alignai.app',
+        icon=None,
+        bundle_identifier=None,
+    )

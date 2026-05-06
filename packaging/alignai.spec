@@ -7,11 +7,26 @@ import sys
 repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src_path = os.path.join(repo_root, 'src')
 
+# Find agents package data (handles different Python versions)
+venv_lib = os.path.join(repo_root, '.venv', 'lib')
+agents_src = None
+if os.path.exists(venv_lib):
+    for python_dir in os.listdir(venv_lib):
+        agents_path = os.path.join(venv_lib, python_dir, 'site-packages', 'agents')
+        if os.path.exists(agents_path):
+            agents_src = agents_path
+            break
+
+# Build datas list conditionally
+datas_list = []
+if agents_src:
+    datas_list.append((agents_src, 'agents'))
+
 a = Analysis(
     [os.path.join(src_path, 'alignai', 'main.py')],
     pathex=[src_path],
     binaries=[],
-    datas=[],
+    datas=datas_list,
     hiddenimports=[
         'agents',
         'openai',
